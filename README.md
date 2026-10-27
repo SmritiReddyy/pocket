@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="Support/AppIcon-1024.png" width="112" alt="Pocket icon">
-</p>
+
 
 <h1 align="center">Pocket</h1>
 
