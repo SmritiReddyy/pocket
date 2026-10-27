@@ -1,0 +1,10 @@
+.DS_Store
+.build/
+.swiftpm/
+build/
+*.dmg
+xcuserdata/
+DerivedData/
+
+# Editor settings
+.idea/
