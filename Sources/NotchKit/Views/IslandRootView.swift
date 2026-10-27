@@ -79,6 +79,14 @@ struct IslandContentLayer: View {
             }
         }
         .frame(width: max(layout.pill.width, 1), height: max(layout.pill.height, 1), alignment: .topLeading)
+        .overlay(alignment: .bottom) {
+            // Peeks out from under the camera while the notch is hovered.
+            if presentation == .hidden(peek: true), model.settings.appearance.peekingFace {
+                PeekFace(height: model.engine.peekFaceHeight)
+                    .padding(.bottom, 3)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .clipShape(pillShape)
         .overlay {
             pillShape

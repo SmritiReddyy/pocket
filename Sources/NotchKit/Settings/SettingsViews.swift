@@ -189,8 +189,9 @@ struct AppearanceSettingsView: View {
 
             Section {
                 Toggle("Pitch black", isOn: $settings.appearance.pitchBlack)
+                Toggle("Peeking face", isOn: $settings.appearance.peekingFace)
             } footer: {
-                Text("The notch itself grows to show what’s happening. Pitch black removes the shadow and outline so the extension is indistinguishable from the notch. On a screen without a notch, it appears in the same spot at the top.")
+                Text("The notch itself grows to show what’s happening. Pitch black removes the shadow and outline so the extension is indistinguishable from the notch. Peeking face shows a little face under the notch when you hover over it. On a screen without a notch, it appears in the same spot at the top.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -47,7 +47,8 @@ struct NotchLayoutTests {
         let notch = engine.notchInWindow
         let peek = layout(.hidden(peek: true)).pill
         #expect(peek.width > notch.width && peek.width < notch.width + 40)
-        #expect(peek.height > notch.height && peek.height < notch.height + 6)
+        let grown = peek.height - engine.peekFaceHeight
+        #expect(grown > notch.height && grown < notch.height + 6, "a slight swell, plus room for the face")
     }
 
     @Test func compactKeepsTheCameraClearAndHasEars() throws {
@@ -199,7 +200,7 @@ struct VirtualNotchLayoutTests {
         #expect(hidden.flare > 0 && hidden.bottomRadius > 0, "keeps its outline while it retracts")
         #expect(IslandPath.path(in: hidden.pill, topRadius: 0, bottomRadius: hidden.bottomRadius, flare: hidden.flare).isEmpty)
         let shown = layout(.hidden(peek: true))
-        #expect(shown.pill.height == engine.notchInWindow.height + 3)
+        #expect(shown.pill.height == engine.notchInWindow.height + 3 + engine.peekFaceHeight)
         #expect(shown.pillOpacity == 1)
     }
 

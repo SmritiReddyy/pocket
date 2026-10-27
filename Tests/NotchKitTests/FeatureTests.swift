@@ -442,3 +442,37 @@ struct HomeCardTests {
         #expect(model.homeContent.cards.isEmpty)
     }
 }
+
+@Suite("Peeking face")
+struct PeekingFaceTests {
+    @Test func peekGrowsForTheFaceOnlyWhenItsOn() throws {
+        let notch = try #require(ScreenMetrics.sample.notch)
+        var appearance = NotchAppearance.standard
+        let withFace = LayoutEngine(screen: .sample, appearance: appearance)
+        appearance.peekingFace = false
+        let plain = LayoutEngine(screen: .sample, appearance: appearance)
+        #expect(plain.layout(for: .hidden(peek: true), home: HomeContent(), hovering: false).pill.height == notch.height + 3)
+        #expect(withFace.layout(for: .hidden(peek: true), home: HomeContent(), hovering: false).pill.height
+            == notch.height + 3 + IslandMetrics.peekFaceHeight)
+        #expect(plain.peekFaceHeight == 0)
+    }
+
+    @Test func movingOntoTheFaceKeepsItPeeking() throws {
+        let engine = LayoutEngine(screen: .sample, appearance: .standard)
+        let notch = try #require(ScreenMetrics.sample.notch)
+        let onFace = CGPoint(x: engine.notchInWindow.midX, y: notch.height + 3 + IslandMetrics.peekFaceHeight / 2)
+        #expect(!engine.notchHoverRect.contains(onFace), "the face's spot alone doesn't start a peek")
+        #expect(engine.peekHoverRect.contains(onFace))
+        let peek = engine.layout(for: .hidden(peek: true), home: HomeContent(), hovering: false)
+        #expect(engine.interactiveRects(for: .hidden(peek: true), layout: peek).contains { $0.contains(onFace) })
+    }
+
+    @MainActor
+    @Test func settingPersists() {
+        let defaults = UserDefaults(suiteName: "PeekingFaceTests.\(UUID().uuidString)")!
+        let store = SettingsStore(defaults: defaults)
+        #expect(store.appearance.peekingFace)
+        store.appearance.peekingFace = false
+        #expect(!SettingsStore(defaults: defaults).appearance.peekingFace)
+    }
+}

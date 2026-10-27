@@ -356,9 +356,9 @@ public struct LayoutEngine: Equatable, Sendable {
             if peek {
                 // The notch swells a little to show it can be clicked. On a display without a
                 // notch this is the moment it appears.
-                layout.pill = shape(body: notch.width + 20, height: notch.height + 3, flare: 5)
+                layout.pill = shape(body: notch.width + 20, height: notch.height + 3 + peekFaceHeight, flare: 5)
                 layout.flare = 5
-                layout.bottomRadius = 11
+                layout.bottomRadius = appearance.peekingFace ? 16 : 11
             } else if isVirtualNotch {
                 // Nothing to hide behind, so it slides up into the top edge of the screen, keeping
                 // its shoulders and rounded corners all the way. At zero height nothing is drawn,
@@ -433,12 +433,25 @@ public struct LayoutEngine: Equatable, Sendable {
         return CGRect(x: notch.minX - 10 - slop, y: 0, width: notch.width + 20 + 2 * slop, height: notch.maxY + 3 + slop)
     }
 
+    /// Height the peek grows below the notch for the face; zero when the face is off.
+    public var peekFaceHeight: CGFloat {
+        appearance.peekingFace ? (IslandMetrics.peekFaceHeight * scale).rounded() : 0
+    }
+
+    /// While the notch is peeking, the face below it counts as the notch too, so moving onto
+    /// the face doesn't make it hide again.
+    public var peekHoverRect: CGRect {
+        var rect = notchHoverRect
+        rect.size.height += peekFaceHeight
+        return rect
+    }
+
     /// Areas that should receive the mouse, in window coordinates.
     public func interactiveRects(for presentation: IslandPresentation, layout: IslandLayout) -> [CGRect] {
         let slop = IslandMetrics.hitSlop
         switch presentation {
-        case .hidden:
-            return [notchHoverRect]
+        case .hidden(let peek):
+            return [peek ? peekHoverRect : notchHoverRect]
         case .compact(_, let secondary):
             var rects = [layout.pill.insetBy(dx: -slop, dy: -slop)]
             if secondary != nil {

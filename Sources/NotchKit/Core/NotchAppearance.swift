@@ -39,19 +39,23 @@ public struct NotchAppearance: Equatable, Sendable, Codable {
     /// Small, medium or large. Width and thickness fine-tune on top of it.
     public var size: NotchSize
     public var nookLayout: NookLayout
+    /// A little face peeks out from under the notch while it's hovered.
+    public var peekingFace: Bool
 
     public init(
         width: Double,
         height: Double,
         pitchBlack: Bool = true,
         size: NotchSize = .large,
-        nookLayout: NookLayout = .standard
+        nookLayout: NookLayout = .standard,
+        peekingFace: Bool = true
     ) {
         self.width = width
         self.height = height
         self.pitchBlack = pitchBlack
         self.size = size
         self.nookLayout = nookLayout
+        self.peekingFace = peekingFace
     }
 
     public static let standard = NotchAppearance(
@@ -71,7 +75,8 @@ public struct NotchAppearance: Equatable, Sendable, Codable {
             height: Self.clamp(height, to: Self.heightRange, fallback: Self.standard.height),
             pitchBlack: pitchBlack,
             size: size,
-            nookLayout: nookLayout
+            nookLayout: nookLayout,
+            peekingFace: peekingFace
         )
     }
 

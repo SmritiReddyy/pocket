@@ -359,7 +359,8 @@ public final class IslandModel {
         let inside: Bool
         if current.isHidden {
             // The usual state: no layout to work out, just the notch's spot.
-            inside = point.map(engine.notchHoverRect.contains) ?? false
+            let rect = isHoveringNotch ? engine.peekHoverRect : engine.notchHoverRect
+            inside = point.map(rect.contains) ?? false
         } else {
             let resting = engine.layout(for: current, home: homeContent, hovering: false)
             inside = point.map { point in

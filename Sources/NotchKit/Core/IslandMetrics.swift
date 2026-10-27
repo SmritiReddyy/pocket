@@ -79,6 +79,8 @@ public enum IslandMetrics {
     /// Displays without a notch get a virtual one at the top centre, the size of a MacBook's.
     /// It's only drawn while something is showing, or once the pointer rests on its spot.
     public static let virtualNotchWidth: CGFloat = 180
+    /// Room below the notch for the face that peeks out while it's hovered.
+    public static let peekFaceHeight: CGFloat = 22
     /// Never shorter than this, so the tabs and content beside it fit as they do on a MacBook.
     public static let virtualNotchMinHeight: CGFloat = 32
 }

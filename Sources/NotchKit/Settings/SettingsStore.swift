@@ -63,6 +63,7 @@ public final class SettingsStore {
             defaults.set(value.nookLayout.rawValue, forKey: Key.nookLayout)
             defaults.set(value.width, forKey: Key.width)
             defaults.set(value.height, forKey: Key.height)
+            defaults.set(value.peekingFace, forKey: Key.peekingFace)
         }
     }
 
@@ -141,7 +142,8 @@ public final class SettingsStore {
             // Elongated isn't released yet: only debug builds can choose it.
             nookLayout: Self.showsElongatedLayout
                 ? defaults.string(forKey: Key.nookLayout).flatMap(NookLayout.init(rawValue:)) ?? standard.nookLayout
-                : standard.nookLayout
+                : standard.nookLayout,
+            peekingFace: defaults.object(forKey: Key.peekingFace) as? Bool ?? standard.peekingFace
         ).clamped()
         showWhenIdle = defaults.object(forKey: Key.showWhenIdle) as? Bool ?? false
         // Keep the behaviour of existing installations after replacing the old toggle with an
@@ -217,6 +219,7 @@ public final class SettingsStore {
         static let nookLayout = "shape.nookLayout"
         static let width = "shape.width"
         static let height = "shape.height"
+        static let peekingFace = "shape.peekingFace"
         static let showWhenIdle = "behavior.showWhenIdle"
         static let notchOpenMode = "behavior.notchOpenMode"
         static let hoverDelay = "behavior.hoverDelay"
