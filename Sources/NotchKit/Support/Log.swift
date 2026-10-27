@@ -1,5 +1,5 @@
 import Foundation
 
 enum Log {
-    static let subsystem = Bundle.main.bundleIdentifier ?? "local.Peekaboo"
+    static let subsystem = Bundle.main.bundleIdentifier ?? "local.Pocket"
 }

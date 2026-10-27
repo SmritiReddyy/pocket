@@ -35,7 +35,7 @@ public final class TrayStore {
     public init(folder: URL? = nil, fileManager: FileManager = .default) {
         self.fileManager = fileManager
         sessionFolder = (folder ?? fileManager.temporaryDirectory)
-            .appendingPathComponent("Peekaboo-Tray-" + UUID().uuidString, isDirectory: true)
+            .appendingPathComponent("Pocket-Tray-" + UUID().uuidString, isDirectory: true)
     }
 
     deinit { try? FileManager.default.removeItem(at: sessionFolder) }

@@ -1,24 +1,24 @@
 <p align="center">
-  <img src="Support/AppIcon-1024.png" width="112" alt="Peekaboo icon">
+  <img src="Support/AppIcon-1024.png" width="112" alt="Pocket icon">
 </p>
 
-<h1 align="center">Peekaboo</h1>
+<h1 align="center">Pocket</h1>
 
-<p align="center"><b>Now you see it, now you don't. 👀</b></p>
+<p align="center"><b>A little pocket at the top of my Mac. 👖</b></p>
 
 ---
 
-My MacBook's notch just sat there. Now it plays peekaboo: it pops open when something's
-happening and hides when nothing is. Think iPhone Dynamic Island, but for my Mac.
+My MacBook's notch just sat there. Now it's a pocket: it pops open when something's happening
+and tucks away when nothing is. Think iPhone Dynamic Island, but for my Mac.
 
-**Click the notch** and you get:
+**Click the notch** and reach in for:
 
 - 📝 a **scratchpad** you can type into right there
 - ✅ today's **reminders**, ready to tick off
 - 📋 your last few **copies**, one click to copy again
 - 📅 your next **event** and ⏱️ one-tap **timers** and Focus sessions
 
-**Click it again** and it hides. Boo.
+**Click it again** and it zips shut.
 
 It also quietly handles charging, low battery, AirPods, volume and brightness, finished
 downloads, a file tray, AirDrop, a camera mirror, Keep Awake and CPU/memory stats.
@@ -33,7 +33,7 @@ You'll need macOS 14+ and Apple's developer tools (`xcode-select --install`). Th
 Scripts/build-app.sh
 ```
 
-Drag `build/Peekaboo.app` into Applications, open it, and you're in.
+Drag `build/Pocket.app` into Applications, open it, and you're in.
 
 👉 **[How to use it](docs/HOW-TO-USE.md)** — every click, swipe and shortcut.
 

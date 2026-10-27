@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "Peekaboo",
+    name: "Pocket",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "Peekaboo", targets: ["Peekaboo"]),
+        .executable(name: "Pocket", targets: ["Pocket"]),
     ],
     targets: [
         .target(
@@ -13,9 +13,9 @@ let package = Package(
             path: "Sources/NotchKit"
         ),
         .executableTarget(
-            name: "Peekaboo",
+            name: "Pocket",
             dependencies: ["NotchKit"],
-            path: "Sources/Peekaboo"
+            path: "Sources/Pocket"
         ),
         .testTarget(
             name: "NotchKitTests",

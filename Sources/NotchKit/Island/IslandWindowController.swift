@@ -73,7 +73,7 @@ public final class IslandWindowController {
         #if DEBUG
         // QA: re-read the real pointer position, as a mouse move would.
         observers.append(DistributedNotificationCenter.default().addObserver(
-            forName: Notification.Name("Peekaboo.debug.pointer"), object: nil, queue: .main
+            forName: Notification.Name("Pocket.debug.pointer"), object: nil, queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.pointerChanged() }
         })

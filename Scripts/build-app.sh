@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Builds "Peekaboo.app" into ./build.
+# Builds "Pocket.app" into ./build.
 #
 #   CONFIG=release|debug        default: release
 #   SIGN_IDENTITY="Developer ID Application: Name (TEAMID)"
 #                               default: "-" (ad-hoc, runs only on this Mac)
 #   VERSION=x.y.z               default: the VERSION file
 #   BUILD_NUMBER=n              default: number of commits, so it always goes up
-#   BUNDLE_ID=local.Peekaboo
+#   BUNDLE_ID=local.Pocket
 #   UNIVERSAL=1                 build for Apple silicon and Intel
 #   DIRECT=1                    compile with swiftc instead of SwiftPM (for a broken
 #                               Command Line Tools install where Package.swift won't link)
@@ -18,8 +18,8 @@ CONFIG="${CONFIG:-release}"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 VERSION="${VERSION:-$(tr -d '[:space:]' < "$ROOT/VERSION")}"
 BUILD_NUMBER="${BUILD_NUMBER:-$(git -C "$ROOT" rev-list --count HEAD 2>/dev/null || echo 1)}"
-BUNDLE_ID="${BUNDLE_ID:-local.Peekaboo}"
-APP="${APP_OUTPUT:-$ROOT/build/Peekaboo.app}"
+BUNDLE_ID="${BUNDLE_ID:-local.Pocket}"
+APP="${APP_OUTPUT:-$ROOT/build/Pocket.app}"
 UPDATE_PUBLIC_KEY="$(tr -d '[:space:]' < "$ROOT/Support/UpdatePublicKey.txt")"
 if [[ -n "$UPDATE_PUBLIC_KEY" && ! "$UPDATE_PUBLIC_KEY" =~ ^[A-Za-z0-9+/]{43}=$ ]]; then
     echo "Invalid Support/UpdatePublicKey.txt (expected base64 Ed25519 public key)" >&2
@@ -48,8 +48,8 @@ if [[ "${DIRECT:-0}" == "1" ]]; then
     SWIFTC=(swiftc -sdk "$SDK" -swift-version 6 -target arm64-apple-macosx14.0 "$OPT")
     "${SWIFTC[@]}" -module-name NotchKit -parse-as-library -emit-module -emit-module-path "$BIN_DIR/mods/NotchKit.swiftmodule" \
         -emit-library -static -o "$BIN_DIR/libNotchKit.a" $(find Sources/NotchKit -name '*.swift')
-    "${SWIFTC[@]}" -module-name Peekaboo -I "$BIN_DIR/mods" -L "$BIN_DIR" -lNotchKit \
-        -o "$BIN_DIR/Peekaboo" Sources/Peekaboo/main.swift
+    "${SWIFTC[@]}" -module-name Pocket -I "$BIN_DIR/mods" -L "$BIN_DIR" -lNotchKit \
+        -o "$BIN_DIR/Pocket" Sources/Pocket/main.swift
 elif [[ "${UNIVERSAL:-0}" == "1" ]]; then
     # Multiple --arch values select XCBuild even with --build-system native.
     # Build each architecture independently so Command Line Tools are sufficient.
@@ -59,8 +59,8 @@ elif [[ "${UNIVERSAL:-0}" == "1" ]]; then
     INTEL_BIN_DIR="$(swift build "${BUILD_FLAGS[@]}" --arch x86_64 --show-bin-path)"
     BIN_DIR="$ROOT/.build/universal-$CONFIG"
     mkdir -p "$BIN_DIR"
-    xcrun lipo -create "$ARM_BIN_DIR/Peekaboo" "$INTEL_BIN_DIR/Peekaboo" -output "$BIN_DIR/Peekaboo"
-    xcrun lipo "$BIN_DIR/Peekaboo" -verify_arch arm64 x86_64
+    xcrun lipo -create "$ARM_BIN_DIR/Pocket" "$INTEL_BIN_DIR/Pocket" -output "$BIN_DIR/Pocket"
+    xcrun lipo "$BIN_DIR/Pocket" -verify_arch arm64 x86_64
 else
     swift build "${BUILD_FLAGS[@]}"
     BIN_DIR="$(swift build "${BUILD_FLAGS[@]}" --show-bin-path)"
@@ -69,7 +69,7 @@ fi
 echo "› Assembling app bundle…"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/Peekaboo" "$APP/Contents/MacOS/Peekaboo"
+cp "$BIN_DIR/Pocket" "$APP/Contents/MacOS/Pocket"
 cp "$ROOT/Support/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD_NUMBER/" -e "s/__BUNDLE_ID__/$BUNDLE_ID/" \
     "$ROOT/Support/Info.plist" > "$APP/Contents/Info.plist"
@@ -78,7 +78,7 @@ plutil -lint "$APP/Contents/Info.plist" > /dev/null
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 if [[ "$CONFIG" == "release" ]]; then
-    strip -x "$APP/Contents/MacOS/Peekaboo"
+    strip -x "$APP/Contents/MacOS/Pocket"
 fi
 
 echo "› Signing with: $SIGN_IDENTITY"
@@ -92,7 +92,7 @@ if [[ "$SIGN_IDENTITY" == "-" ]]; then
 else
     SIGN_FLAGS+=(--timestamp)
 fi
-codesign "${SIGN_FLAGS[@]}" --entitlements "$ROOT/Support/Peekaboo.entitlements" --sign "$SIGN_IDENTITY" "$APP"
+codesign "${SIGN_FLAGS[@]}" --entitlements "$ROOT/Support/Pocket.entitlements" --sign "$SIGN_IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP"
 
 echo "✓ Built $APP ($VERSION, build $BUILD_NUMBER)"

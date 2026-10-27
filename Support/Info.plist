@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Peekaboo</string>
+	<string>Pocket</string>
 	<key>CFBundleExecutable</key>
-	<string>Peekaboo</string>
+	<string>Pocket</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Peekaboo</string>
+	<string>Pocket</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -33,17 +33,17 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Peekaboo shows your next event in the notch and gives you a heads-up before it starts.</string>
+	<string>Pocket shows your next event in the notch and gives you a heads-up before it starts.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Peekaboo shows your next event in the notch and gives you a heads-up before it starts.</string>
+	<string>Pocket shows your next event in the notch and gives you a heads-up before it starts.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>Peekaboo shows today's to-dos in the notch so you can tick them off.</string>
+	<string>Pocket shows today's to-dos in the notch so you can tick them off.</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>Peekaboo shows today's to-dos in the notch so you can tick them off.</string>
+	<string>Pocket shows today's to-dos in the notch so you can tick them off.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Mirror shows your camera so you can check how you look before a call. Nothing is recorded.</string>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Peekaboo reads the saved document or web address of the window you drop into Tray.</string>
+	<string>Pocket reads the saved document or web address of the window you drop into Tray.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026. All rights reserved.</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>

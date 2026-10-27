@@ -1,4 +1,4 @@
-# How to use Peekaboo
+# How to use Pocket
 
 The short version: **click the notch to open it, click it again to close it.** Everything else
 is a bonus. 👇
@@ -83,5 +83,5 @@ These pop up by themselves, no clicking needed:
   notch.
 - **It keeps asking for permissions after a rebuild.** macOS does that for apps that aren't signed
   with an Apple developer account. Allow them again.
-- **Want it gone?** Menu bar capsule › **Quit Peekaboo**, then bin the app. To wipe your
-  settings and notes too, delete `~/Library/Preferences/local.Peekaboo.plist`.
+- **Want it gone?** Menu bar capsule › **Quit Pocket**, then bin the app. To wipe your
+  settings and notes too, delete `~/Library/Preferences/local.Pocket.plist`.

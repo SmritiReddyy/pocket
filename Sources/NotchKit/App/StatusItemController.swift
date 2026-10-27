@@ -31,10 +31,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         if model.settings.showMenuBarIcon {
             guard item == nil else { return }
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-            let image = NSImage(systemSymbolName: "capsule.inset.filled", accessibilityDescription: "Peekaboo")
+            let image = NSImage(systemSymbolName: "capsule.inset.filled", accessibilityDescription: "Pocket")
             image?.isTemplate = true
             item.button?.image = image
-            item.button?.toolTip = "Peekaboo"
+            item.button?.toolTip = "Pocket"
             let menu = NSMenu()
             menu.delegate = self
             item.menu = menu
@@ -96,12 +96,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let settings = action("Settings…") { [weak self] in self?.openSettings() }
         settings.keyEquivalent = ","
         menu.addItem(settings)
-        menu.addItem(action("About Peekaboo") {
+        menu.addItem(action("About Pocket") {
             NSApp.activate()
             NSApp.orderFrontStandardAboutPanel(nil)
         })
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit Peekaboo", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let quit = NSMenuItem(title: "Quit Pocket", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         menu.addItem(quit)
     }
 

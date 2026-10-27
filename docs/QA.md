@@ -1,7 +1,7 @@
 # QA report: version 1.1.0
 
 Tested 2026-10-21 on a MacBook Air M2 (Mac14,2, 179 × 32 pt notch), macOS 27.0, Xcode 26.4.1,
-with a second display attached. Three passes: first build, rename to Peekaboo, and a
+with a second display attached. Three passes: first build, rename to Pocket, and a
 full bug-hunt and optimization pass (§5). Every pass ended with a clean rebuild and all checks
 below.
 

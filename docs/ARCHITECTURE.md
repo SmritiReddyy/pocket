@@ -2,7 +2,7 @@
 
 ```
 Sources/
-├── Peekaboo/main.swift           App entry point (starts AppDelegate)
+├── Pocket/main.swift           App entry point (starts AppDelegate)
 ├── NotchMediaBridge/             Objective-C library loaded by /usr/bin/perl
 └── NotchKit/
     ├── Core/                     Pure logic, no AppKit: fully unit-tested
@@ -56,13 +56,13 @@ Sources/
 
 ## Debug commands
 
-Debug builds listen for a distributed notification named `Peekaboo.debug`. Its object is a
+Debug builds listen for a distributed notification named `Pocket.debug`. Its object is a
 command: `timer:<seconds>`, `pause`, `cancel`, `home`, `expand`, `collapse`, `charging`,
 `lowbattery`, `headphones`, `drop`, `target`, `nodrop`, `peek`, `hover`, `unhover`, `swipe`,
 `settings:<tab>`, `idle`, `dismiss`, `size:<small|medium|large>`, `welcome`,
-`dump` (writes the model state to `$TMPDIR/Peekaboo-debug.txt`), `tray`, `mirror`,
+`dump` (writes the model state to `$TMPDIR/Pocket-debug.txt`), `tray`, `mirror`,
 `trayadd:<path>:<path>`, `volume:<0-1>`, `brightness:<0-1>`, `event`, `shortcutdone`. Example:
 
 ```bash
-osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("Peekaboo.debug", "charging", $(), true)'
+osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("Pocket.debug", "charging", $(), true)'
 ```

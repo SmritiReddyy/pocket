@@ -95,7 +95,7 @@ struct IslandContentLayer: View {
         .contextMenu { IslandContextMenu(model: model, presentation: presentation) }
         .position(x: layout.pill.midX, y: layout.pill.midY)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Peekaboo"))
+        .accessibilityLabel(Text("Pocket"))
     }
 
     private var hasBubble: Bool {
@@ -203,7 +203,7 @@ struct IslandContextMenu: View {
         Button("All Features") { model.showTab(.launcher) }
         Button(model.keepAwake.isOn ? "Stop Keeping Awake" : "Keep Mac Awake") { model.keepAwake.toggle() }
         Button("Settings…") { model.onOpenSettings?() }
-        Button("Quit Peekaboo") { NSApp.terminate(nil) }
+        Button("Quit Pocket") { NSApp.terminate(nil) }
     }
 }
 

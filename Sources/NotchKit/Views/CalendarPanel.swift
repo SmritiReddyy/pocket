@@ -16,11 +16,11 @@ struct CalendarPanelBody: View {
                 calendar.requestAccess()
             }
         case .denied:
-            ConnectPrompt(text: "Calendar access is off for Peekaboo.", button: "Turn On in Settings", tint: .white) {
+            ConnectPrompt(text: "Calendar access is off for Pocket.", button: "Turn On in Settings", tint: .white) {
                 calendar.openPrivacySettings()
             }
         case .limited:
-            ConnectPrompt(text: "Peekaboo can add events but can't see them yet.", button: "Allow Full Access", tint: .white) {
+            ConnectPrompt(text: "Pocket can add events but can't see them yet.", button: "Allow Full Access", tint: .white) {
                 calendar.openPrivacySettings()
             }
         case .granted:

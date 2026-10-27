@@ -55,7 +55,7 @@ struct GeneralSettingsView: View {
                     .onChange(of: launchAtLogin) { _, enabled in setLaunchAtLogin(enabled) }
                 if needsApproval {
                     HStack {
-                        Text("Allow Peekaboo in Login Items to finish.")
+                        Text("Allow Pocket in Login Items to finish.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
@@ -84,7 +84,7 @@ struct GeneralSettingsView: View {
                     Text("All displays").tag(DisplayChoice.all)
                 }
             } footer: {
-                Text("Built-in display keeps it on your MacBook's notch. Pick a screen by name to keep it there, or All displays to show it on every screen: timers and alerts appear everywhere, and what you open shows on the screen you're using. Screens without a notch get a notch of their own at the top, which stays out of sight until something's showing or you rest the pointer on its spot. When the menu bar icon is hidden, open Peekaboo again from Applications to get back here.")
+                Text("Built-in display keeps it on your MacBook's notch. Pick a screen by name to keep it there, or All displays to show it on every screen: timers and alerts appear everywhere, and what you open shows on the screen you're using. Screens without a notch get a notch of their own at the top, which stays out of sight until something's showing or you rest the pointer on its spot. When the menu bar icon is hidden, open Pocket again from Applications to get back here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -283,7 +283,7 @@ struct HomeSettingsView: View {
                 IconToggle(title: "File Tray", detail: "Drag saved document windows here. Up to 30 shortcuts; clears when the app quits", symbol: "tray.full.fill", color: .cyan, isOn: $settings.trayEnabled)
                 if settings.trayEnabled {
                     Button("Allow document window dragging…") { DocumentWindowDrag.requestAccess() }
-                    Text("Enable Peekaboo in macOS Accessibility settings to store a saved document by dragging its whole window to the notch. The source app must expose its saved document location. Some apps also ask for Automation access. Unsaved or ambiguous documents cannot be stored.")
+                    Text("Enable Pocket in macOS Accessibility settings to store a saved document by dragging its whole window to the notch. The source app must expose its saved document location. Some apps also ask for Automation access. Unsaved or ambiguous documents cannot be stored.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -373,7 +373,7 @@ struct AboutSettingsView: View {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
                 .frame(width: 96, height: 96)
-            Text("Peekaboo")
+            Text("Pocket")
                 .font(.system(size: 22, weight: .semibold))
             Text(version)
                 .font(.callout)

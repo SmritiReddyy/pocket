@@ -64,7 +64,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.delegate = self
         window.setContentSize(tabs.tabViewItems.first?.viewController?.preferredContentSize ?? CGSize(width: 520, height: 552))
         window.title = tabs.tabViewItems.first?.label ?? ""
-        window.setFrameAutosaveName("PeekabooSettings")
+        window.setFrameAutosaveName("PocketSettings")
         self.window = window
         tabController = tabs
         return window

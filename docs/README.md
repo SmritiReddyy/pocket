@@ -1,6 +1,6 @@
 # Developer docs
 
-Everything here is for people who want to build, change or ship Peekaboo. If you only want
+Everything here is for people who want to build, change or ship Pocket. If you only want
 to use the app, see [How to use it](HOW-TO-USE.md).
 
 | Doc | What's in it |
@@ -17,15 +17,15 @@ to use the app, see [How to use it](HOW-TO-USE.md).
 Needs Swift 6 (Xcode 16 or later). Built and tested with Xcode 26.4 on macOS 27.
 
 ```bash
-git clone https://github.com/SmritiReddyy/peekaboo.git
+git clone https://github.com/SmritiReddyy/pocket.git
 ```
 
 ```bash
-cd peekaboo && ./Scripts/build-app.sh
+cd pocket && ./Scripts/build-app.sh
 ```
 
 ```bash
-open "build/Peekaboo.app"
+open "build/Pocket.app"
 ```
 
 `CONFIG=debug ./Scripts/build-app.sh` builds a debug app that also accepts the debug commands

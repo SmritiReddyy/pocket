@@ -25,7 +25,7 @@ public final class KeepAwakeService {
             let status = IOPMAssertionCreateWithName(
                 kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
                 IOPMAssertionLevel(kIOPMAssertionLevelOn),
-                "Peekaboo: Keep Awake" as CFString,
+                "Pocket: Keep Awake" as CFString,
                 &id
             )
             guard status == kIOReturnSuccess else { return }
