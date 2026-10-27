@@ -20,12 +20,12 @@ struct SizeModeTests {
         #expect(large.scale == 1)
         #expect(large.compactBodyWidth == CGFloat(180 + 2 * 47))
         #expect(large.expandedWidth == CGFloat(390))
-        #expect(large.expandedContentHeight(for: .expanded(.call), home: HomeContent()) == IslandMetrics.ContentHeight.call)
+        #expect(large.expandedContentHeight(for: .expanded(.timer), home: HomeContent()) == IslandMetrics.ContentHeight.timer)
     }
 
     @Test func smallerSizesShrinkEverything() {
         let presentations: [IslandPresentation] = [
-            .compact(primary: .timer, secondary: .stopwatch), .expanded(.call), .expanded(.timer), .home,
+            .compact(primary: .timer, secondary: .stopwatch), .expanded(.stopwatch), .expanded(.timer), .home,
             .alert(.charging(level: 50, isCharging: true)), .alert(.timerFinished), .drop(targeted: false),
         ]
         let external = ScreenMetrics(size: CGSize(width: 1920, height: 1080), notch: nil, menuBarHeight: 25)
@@ -52,8 +52,8 @@ struct SizeModeTests {
     @Test func smallExpandedStillFitsItsContent() {
         let small = engine(.small)
         #expect(small.expandedWidth >= small.compactBodyWidth + 40)
-        let height = small.expandedContentHeight(for: .expanded(.call), home: HomeContent())
-        #expect(height == (IslandMetrics.ContentHeight.call * 0.8).rounded())
+        let height = small.expandedContentHeight(for: .expanded(.timer), home: HomeContent())
+        #expect(height == (IslandMetrics.ContentHeight.timer * 0.8).rounded())
     }
 
     @MainActor

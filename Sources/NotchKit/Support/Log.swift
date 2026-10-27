@@ -1,5 +1,5 @@
 import Foundation
 
 enum Log {
-    static let subsystem = Bundle.main.bundleIdentifier ?? "com.rectircle.DynamicNotch"
+    static let subsystem = Bundle.main.bundleIdentifier ?? "local.Peekaboo"
 }

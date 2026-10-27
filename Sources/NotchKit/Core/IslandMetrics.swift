@@ -21,7 +21,6 @@ public enum IslandMetrics {
     /// and padding below.
     public enum ContentHeight {
         public static let timer: CGFloat = 76
-        public static let call: CGFloat = 72
         public static let drop: CGFloat = 100
         public static let timerFinished: CGFloat = 72
         /// Tallest expanded content; sizes the window.

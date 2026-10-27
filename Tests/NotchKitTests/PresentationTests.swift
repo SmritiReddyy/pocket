@@ -18,9 +18,9 @@ struct PresentationTests {
         #expect(PresentationResolver.resolve(PresentationInput(isPreviewing: true)) == .idle)
     }
 
-    @Test func priorityIsCallThenTimerThenStopwatch() {
-        let input = PresentationInput(activeActivities: [.stopwatch, .timer, .call])
-        #expect(PresentationResolver.resolve(input) == .compact(primary: .call, secondary: .timer))
+    @Test func priorityIsTimerThenStopwatchThenStats() {
+        let input = PresentationInput(activeActivities: [.stats, .stopwatch, .timer])
+        #expect(PresentationResolver.resolve(input) == .compact(primary: .timer, secondary: .stopwatch))
         let two = PresentationInput(activeActivities: [.stopwatch, .timer])
         #expect(PresentationResolver.resolve(two) == .compact(primary: .timer, secondary: .stopwatch))
     }
@@ -33,15 +33,15 @@ struct PresentationTests {
     }
 
     @Test func swipingVisitsEveryActivity() {
-        let all: Set<ActivityKind> = [.call, .timer, .stopwatch]
-        var current: ActivityKind? = .call
+        let all: Set<ActivityKind> = [.timer, .stopwatch, .stats]
+        var current: ActivityKind? = .timer
         var seen: [ActivityKind] = []
         for _ in 0..<3 {
             current = PresentationResolver.nextPrimary(all, current: current, forward: true)
             seen.append(current!)
         }
-        #expect(seen == [.timer, .stopwatch, .call])
-        #expect(PresentationResolver.nextPrimary(all, current: .call, forward: false) == .stopwatch)
+        #expect(seen == [.stopwatch, .stats, .timer])
+        #expect(PresentationResolver.nextPrimary(all, current: .timer, forward: false) == .stats)
         #expect(PresentationResolver.nextPrimary([.timer], current: .timer, forward: true) == nil)
         #expect(PresentationResolver.nextPrimary([.timer, .stopwatch], current: nil, forward: true) == .stopwatch)
     }
@@ -68,7 +68,7 @@ struct PresentationTests {
         let compact = IslandPresentation.compact(primary: .timer, secondary: nil)
         let other = IslandPresentation.compact(primary: .stopwatch, secondary: nil)
         #expect(compact.topology == other.topology)
-        #expect(compact.topology != IslandPresentation.compact(primary: .timer, secondary: .call).topology)
+        #expect(compact.topology != IslandPresentation.compact(primary: .timer, secondary: .stopwatch).topology)
         #expect(compact.topology != IslandPresentation.hidden(peek: false).topology)
         #expect(IslandPresentation.home.topology == IslandPresentation.expanded(.timer).topology)
     }
@@ -78,7 +78,7 @@ struct PresentationTests {
         #expect(IslandPresentation.drop(targeted: false).isExpandedFamily)
         #expect(!IslandPresentation.idle.isExpandedFamily)
         #expect(IslandPresentation.idle.isRestingPill)
-        #expect(IslandPresentation.compact(primary: .call, secondary: nil).isRestingPill)
+        #expect(IslandPresentation.compact(primary: .stopwatch, secondary: nil).isRestingPill)
         #expect(!IslandPresentation.hidden(peek: true).isVisible)
     }
 }

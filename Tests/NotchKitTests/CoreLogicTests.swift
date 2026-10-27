@@ -201,26 +201,6 @@ struct TimeFormattingTests {
 
 @Suite("Classifiers and maths")
 struct ClassifierTests {
-    @Test func callApps() {
-        #expect(CallClassifier.isCallApp("us.zoom.xos"))
-        #expect(CallClassifier.isCallApp("com.apple.FaceTime"))
-        #expect(!CallClassifier.isCallApp("com.apple.VoiceMemos"))
-        #expect(!CallClassifier.isCallApp(nil))
-    }
-
-    @Test func ignoredSystemServices() {
-        #expect(CallClassifier.shouldIgnore("com.apple.SpeechRecognitionCore.speechrecognitiond"))
-        #expect(CallClassifier.shouldIgnore("com.apple.siri.embeddedspeech"))
-        #expect(!CallClassifier.shouldIgnore("com.apple.FaceTime"))
-        #expect(!CallClassifier.shouldIgnore(nil))
-    }
-
-    @Test func helperBundles() {
-        #expect(CallClassifier.appBundleIdentifier(forHelper: "com.google.Chrome.helper") == "com.google.Chrome")
-        #expect(CallClassifier.appBundleIdentifier(forHelper: "com.google.Chrome.helper.Renderer") == "com.google.Chrome")
-        #expect(CallClassifier.appBundleIdentifier(forHelper: "us.zoom.xos") == "us.zoom.xos")
-    }
-
     @Test func headphoneSymbols() {
         #expect(HeadphoneSymbol.symbol(forDeviceName: "Sam’s AirPods Pro") == "airpodspro")
         #expect(HeadphoneSymbol.symbol(forDeviceName: "AirPods Max") == "airpodsmax")

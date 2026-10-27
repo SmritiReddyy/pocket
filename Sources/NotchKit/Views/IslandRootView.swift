@@ -95,7 +95,7 @@ struct IslandContentLayer: View {
         .contextMenu { IslandContextMenu(model: model, presentation: presentation) }
         .position(x: layout.pill.midX, y: layout.pill.midY)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Dynamic Notch"))
+        .accessibilityLabel(Text("Peekaboo"))
     }
 
     private var hasBubble: Bool {
@@ -158,8 +158,6 @@ struct NotchContent: View {
             TimerExpandedView(model: model)
         case .expanded(.stopwatch):
             StopwatchExpandedView(model: model)
-        case .expanded(.call):
-            CallExpandedView(model: model)
         case .expanded(.stats):
             // Stats opens in the nook; this only covers the moment before that switch.
             StatsPanelBody(model: model)
@@ -201,18 +199,11 @@ struct IslandContextMenu: View {
             Button("Reset Stopwatch") { model.resetStopwatch() }
             Divider()
         }
-        if let session = model.calls.session {
-            Button("Show \(session.appName)") { model.calls.showApp() }
-            if model.microphone.canMute {
-                Button(model.microphone.isMuted ? "Unmute Microphone" : "Mute Microphone") { model.microphone.toggle() }
-            }
-            Divider()
-        }
         Button("Open Home") { model.showTab(.home) }
         Button("All Features") { model.showTab(.launcher) }
         Button(model.keepAwake.isOn ? "Stop Keeping Awake" : "Keep Mac Awake") { model.keepAwake.toggle() }
         Button("Settings…") { model.onOpenSettings?() }
-        Button("Quit Dynamic Notch") { NSApp.terminate(nil) }
+        Button("Quit Peekaboo") { NSApp.terminate(nil) }
     }
 }
 
@@ -237,7 +228,6 @@ private struct ActivityHeader: View {
         return switch kind {
         case .timer: (model.timer.timer?.mode ?? .plain).title
         case .stopwatch: "Stopwatch"
-        case .call: model.calls.session?.isCall == false ? "Microphone" : "Call"
         case .stats: "Stats"
         }
     }

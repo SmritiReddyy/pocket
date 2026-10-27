@@ -20,7 +20,7 @@ struct SettingsStoreTests {
         #expect(!store.showWhenIdle)
         #expect(store.notchOpenMode == .click)
         #expect(store.hoverDelay == 0.4)
-        #expect(store.timerEnabled && store.callsEnabled && store.airDropEnabled)
+        #expect(store.timerEnabled && store.airDropEnabled)
         #expect(store.display == .automatic)
     }
 
@@ -33,7 +33,7 @@ struct SettingsStoreTests {
         store.display = .main
         store.notchOpenMode = .hover
         store.hoverDelay = 0.4
-        store.callsEnabled = false
+        store.timerEnabled = false
 
         let reloaded = SettingsStore(defaults: defaults)
         #expect(reloaded.appearance.width == 300)
@@ -42,7 +42,7 @@ struct SettingsStoreTests {
         #expect(reloaded.display == .main)
         #expect(reloaded.notchOpenMode == .hover)
         #expect(reloaded.hoverDelay == 0.4)
-        #expect(!reloaded.callsEnabled)
+        #expect(!reloaded.timerEnabled)
     }
 
     @Test func badStoredValuesFallBack() {

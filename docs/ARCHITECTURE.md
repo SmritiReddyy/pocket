@@ -2,7 +2,7 @@
 
 ```
 Sources/
-├── DynamicNotch/main.swift       App entry point (starts AppDelegate)
+├── Peekaboo/main.swift           App entry point (starts AppDelegate)
 ├── NotchMediaBridge/             Objective-C library loaded by /usr/bin/perl
 └── NotchKit/
     ├── Core/                     Pure logic, no AppKit: fully unit-tested
@@ -23,7 +23,6 @@ Sources/
     │   │                           and album-art tint off the main thread
     │   ├── NowPlayingService       Track, artwork, controls, pause linger
     │   ├── TimerService            Timer + alarm sound + App Nap guard
-    │   ├── CallMonitor             Microphone (Core Audio) and camera (Core Media IO)
     │   ├── AudioRouteMonitor       Bluetooth headphones becoming the output
     │   ├── PowerMonitor            IOKit power-source notifications
     │   ├── TrayStore               Up to 30 session-only references; generated shortcuts cleaned on clear/exit
@@ -57,13 +56,13 @@ Sources/
 
 ## Debug commands
 
-Debug builds listen for a distributed notification named `DynamicNotch.debug`. Its object is a
+Debug builds listen for a distributed notification named `Peekaboo.debug`. Its object is a
 command: `timer:<seconds>`, `pause`, `cancel`, `home`, `expand`, `collapse`, `charging`,
 `lowbattery`, `headphones`, `drop`, `target`, `nodrop`, `peek`, `hover`, `unhover`, `swipe`,
 `settings:<tab>`, `idle`, `dismiss`, `size:<small|medium|large>`, `welcome`,
-`dump` (writes the model state to `$TMPDIR/DynamicNotch-debug.txt`), `tray`, `mirror`,
+`dump` (writes the model state to `$TMPDIR/Peekaboo-debug.txt`), `tray`, `mirror`,
 `trayadd:<path>:<path>`, `volume:<0-1>`, `brightness:<0-1>`, `event`, `shortcutdone`. Example:
 
 ```bash
-osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("DynamicNotch.debug", "charging", $(), true)'
+osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("Peekaboo.debug", "charging", $(), true)'
 ```

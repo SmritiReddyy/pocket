@@ -1,28 +1,6 @@
 import AppKit
 import SwiftUI
 
-struct AppIconView: View {
-    var icon: NSImage?
-    var symbol: String
-    var tint: Color
-    var size: CGFloat
-
-    var body: some View {
-        if let icon {
-            Image(nsImage: icon)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-        } else {
-            Image(systemName: symbol)
-                .font(.system(size: size * 0.5, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: size, height: size)
-        }
-    }
-}
-
 /// Scales down slightly while pressed, like iOS controls.
 struct PressableButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {

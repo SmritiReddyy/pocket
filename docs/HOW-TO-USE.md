@@ -1,4 +1,4 @@
-# How to use Dynamic Notch
+# How to use Peekaboo
 
 The short version: **click the notch to open it, click it again to close it.** Everything else
 is a bonus. 👇
@@ -11,7 +11,7 @@ is a bonus. 👇
 | Close it | Click the notch again, click anywhere else, or just move your mouse away |
 | Open without clicking | Settings › General › **Hover**, or pull down on the notch with two fingers |
 | Close with a gesture | Push up on the notch with two fingers |
-| Swap between two live things (say, a timer and a call) | Swipe sideways on the notch with two fingers |
+| Swap between two live things (say, a timer and a stopwatch) | Swipe sideways on the notch with two fingers |
 | Quick actions | Right-click the notch |
 | Settings | Capsule icon in the menu bar › **Settings…** |
 
@@ -38,7 +38,7 @@ Settings › Home and Home shrinks to fit.
 - **Tray** — drag files onto the notch and drop them on **Tray** to park them for later. Drag them
   back out when you need them. Clears when you quit, and your originals are never touched.
 - **AirDrop** — drag files onto the notch and drop them on **AirDrop**.
-- **The grid** (⊞ top right) has everything else: Stopwatch, Mirror (camera check before calls),
+- **The grid** (⊞ top right) has everything else: Stopwatch, Mirror (a quick camera check),
   Keep Awake, Stats and the full panels.
 
 ## Keyboard shortcuts
@@ -62,7 +62,6 @@ All of them are **⌃⌥** (Control + Option) plus a letter:
 
 These pop up by themselves, no clicking needed:
 
-- 📞 **Calls** on FaceTime, Zoom, Meet, Teams and friends, with a timer and a mic mute button
 - ⏳ **Timers** counting down beside the camera
 - 🔋 **Charging** and **low battery**
 - 🎧 **AirPods** and headphones connecting
@@ -84,5 +83,5 @@ These pop up by themselves, no clicking needed:
   notch.
 - **It keeps asking for permissions after a rebuild.** macOS does that for apps that aren't signed
   with an Apple developer account. Allow them again.
-- **Want it gone?** Menu bar capsule › **Quit Dynamic Notch**, then bin the app. To wipe your
-  settings and notes too, delete `~/Library/Preferences/local.DynamicNotch.NoMusic.plist`.
+- **Want it gone?** Menu bar capsule › **Quit Peekaboo**, then bin the app. To wipe your
+  settings and notes too, delete `~/Library/Preferences/local.Peekaboo.plist`.

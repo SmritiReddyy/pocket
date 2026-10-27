@@ -83,7 +83,6 @@ public final class SettingsStore {
     public var timerSound: Bool { didSet { defaults.set(timerSound, forKey: Key.timerSound) } }
 
     public var timerEnabled: Bool { didSet { defaults.set(timerEnabled, forKey: Key.timer) } }
-    public var callsEnabled: Bool { didSet { defaults.set(callsEnabled, forKey: Key.calls) } }
     public var airDropEnabled: Bool { didSet { defaults.set(airDropEnabled, forKey: Key.airDrop) } }
     public var chargingAlertsEnabled: Bool { didSet { defaults.set(chargingAlertsEnabled, forKey: Key.charging) } }
     public var lowBatteryAlertsEnabled: Bool { didSet { defaults.set(lowBatteryAlertsEnabled, forKey: Key.lowBattery) } }
@@ -161,7 +160,6 @@ public final class SettingsStore {
         display = (defaults.string(forKey: Key.display)).flatMap(DisplayChoice.init(rawValue:)) ?? .automatic
         timerSound = defaults.object(forKey: Key.timerSound) as? Bool ?? true
         timerEnabled = defaults.object(forKey: Key.timer) as? Bool ?? true
-        callsEnabled = defaults.object(forKey: Key.calls) as? Bool ?? true
         airDropEnabled = defaults.object(forKey: Key.airDrop) as? Bool ?? true
         chargingAlertsEnabled = defaults.object(forKey: Key.charging) as? Bool ?? true
         lowBatteryAlertsEnabled = defaults.object(forKey: Key.lowBattery) as? Bool ?? true
@@ -231,7 +229,6 @@ public final class SettingsStore {
         static let display = "general.display"
         static let timerSound = "timer.sound"
         static let timer = "activity.timer"
-        static let calls = "activity.calls"
         static let airDrop = "activity.airDrop"
         static let charging = "alert.charging"
         static let lowBattery = "alert.lowBattery"

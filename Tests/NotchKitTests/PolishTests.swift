@@ -219,7 +219,7 @@ struct ElongatedLayoutTests {
     }
 
     @Test func panelsKeepTheirOwnSize() {
-        for presentation in [IslandPresentation.nook(.launcher), .nook(.calendar), .nook(.timers), .nook(.stats), .expanded(.call)] {
+        for presentation in [IslandPresentation.nook(.launcher), .nook(.calendar), .nook(.timers), .nook(.stats), .expanded(.timer)] {
             #expect(engine(.elongated).layout(for: presentation, home: HomeContent(), hovering: false).pill
                 == engine(.standard).layout(for: presentation, home: HomeContent(), hovering: false).pill)
         }

@@ -5,7 +5,7 @@ import AppKit
 ///
 ///     osascript -l JavaScript -e 'ObjC.import("Foundation");
 ///       $.NSDistributedNotificationCenter.defaultCenter
-///         .postNotificationNameObjectUserInfoDeliverImmediately("DynamicNotch.debug", "charging", $(), true)'
+///         .postNotificationNameObjectUserInfoDeliverImmediately("Peekaboo.debug", "charging", $(), true)'
 @MainActor
 final class DebugHooks {
     private let model: IslandModel
@@ -16,7 +16,7 @@ final class DebugHooks {
         self.model = model
         self.settings = settings
         observer = DistributedNotificationCenter.default().addObserver(
-            forName: Notification.Name("DynamicNotch.debug"),
+            forName: Notification.Name("Peekaboo.debug"),
             object: nil,
             queue: .main
         ) { [weak self] notification in
@@ -75,7 +75,7 @@ final class DebugHooks {
             let line = "presentation=\(model.presentation) active=\(model.activeActivities.map(\.rawValue).sorted()) "
                 + "expand=\(String(describing: model.expandTarget)) "
                 + "hoverNotch=\(model.isHoveringNotch) hoverPill=\(model.isHoveringPill) notch=\(model.engine.notchInWindow) virtual=\(model.engine.isVirtualNotch)\n"
-            let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("DynamicNotch-debug.txt")
+            let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("Peekaboo-debug.txt")
             if let handle = try? FileHandle(forWritingTo: url) {
                 handle.seekToEndOfFile()
                 handle.write(Data(line.utf8))

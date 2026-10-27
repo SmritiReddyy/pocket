@@ -31,10 +31,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         if model.settings.showMenuBarIcon {
             guard item == nil else { return }
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-            let image = NSImage(systemSymbolName: "capsule.inset.filled", accessibilityDescription: "Dynamic Notch")
+            let image = NSImage(systemSymbolName: "capsule.inset.filled", accessibilityDescription: "Peekaboo")
             image?.isTemplate = true
             item.button?.image = image
-            item.button?.toolTip = "Dynamic Notch"
+            item.button?.toolTip = "Peekaboo"
             let menu = NSMenu()
             menu.delegate = self
             item.menu = menu
@@ -96,12 +96,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let settings = action("Settings…") { [weak self] in self?.openSettings() }
         settings.keyEquivalent = ","
         menu.addItem(settings)
-        menu.addItem(action("About Dynamic Notch") {
+        menu.addItem(action("About Peekaboo") {
             NSApp.activate()
             NSApp.orderFrontStandardAboutPanel(nil)
         })
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit Dynamic Notch", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let quit = NSMenuItem(title: "Quit Peekaboo", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         menu.addItem(quit)
     }
 

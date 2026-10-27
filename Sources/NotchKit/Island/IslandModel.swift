@@ -8,7 +8,6 @@ import os
 public final class IslandModel {
     public let settings: SettingsStore
     public let timer: TimerService
-    public let calls: CallMonitor
     public let power: PowerMonitor
     public let audioRoute: AudioRouteMonitor
     public let tray: TrayStore
@@ -19,7 +18,6 @@ public final class IslandModel {
     public let notes: NotesStore
     public let stopwatch: StopwatchService
     public let keepAwake = KeepAwakeService()
-    public let microphone = MicrophoneMute()
     public let downloads: DownloadsWatcher
     public let reminders = RemindersService()
     public let stats = StatsService()
@@ -77,7 +75,6 @@ public final class IslandModel {
     public init(
         settings: SettingsStore,
         timer: TimerService = TimerService(),
-        calls: CallMonitor = CallMonitor(),
         power: PowerMonitor = PowerMonitor(),
         audioRoute: AudioRouteMonitor = AudioRouteMonitor(),
         tray: TrayStore = TrayStore(),
@@ -92,7 +89,6 @@ public final class IslandModel {
     ) {
         self.settings = settings
         self.timer = timer
-        self.calls = calls
         self.power = power
         self.audioRoute = audioRoute
         self.tray = tray
@@ -135,14 +131,12 @@ public final class IslandModel {
     }
 
     public func startServices() {
-        calls.start()
         power.start()
         audioRoute.start()
         calendar.start()
         levels.start()
         if settings.clipboardEnabled { clipboard.start() }
         if settings.downloadsEnabled { downloads.start() }
-        microphone.start()
         if settings.remindersEnabled { reminders.start() }
         syncStatsSampling()
         if settings.keyboardShortcutsEnabled { hotKeys.register() }
@@ -157,14 +151,12 @@ public final class IslandModel {
     }
 
     public func stopServices() {
-        calls.stop()
         power.stop()
         audioRoute.stop()
         calendar.stop()
         levels.stop()
         clipboard.stop()
         downloads.stop()
-        microphone.stop()
         reminders.stop()
         stats.stop()
         hotKeys.unregister()
@@ -226,7 +218,6 @@ public final class IslandModel {
 
     public var activeActivities: Set<ActivityKind> {
         var active = Set<ActivityKind>()
-        if settings.callsEnabled, calls.session != nil { active.insert(.call) }
         if settings.timerEnabled, timer.isActive { active.insert(.timer) }
         if settings.timerEnabled, stopwatch.isActive { active.insert(.stopwatch) }
         // Stats fills the notch only when nothing else is happening.

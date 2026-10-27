@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "DynamicNotch",
+    name: "Peekaboo",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "DynamicNotch", targets: ["DynamicNotch"]),
+        .executable(name: "Peekaboo", targets: ["Peekaboo"]),
     ],
     targets: [
         .target(
@@ -13,9 +13,9 @@ let package = Package(
             path: "Sources/NotchKit"
         ),
         .executableTarget(
-            name: "DynamicNotch",
+            name: "Peekaboo",
             dependencies: ["NotchKit"],
-            path: "Sources/DynamicNotch"
+            path: "Sources/Peekaboo"
         ),
         .testTarget(
             name: "NotchKitTests",

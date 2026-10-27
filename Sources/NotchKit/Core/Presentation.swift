@@ -2,7 +2,6 @@ import Foundation
 
 /// A live activity that can sit in the pill. Order of cases is not meaningful; use `priority`.
 public enum ActivityKind: String, CaseIterable, Sendable, Codable, Hashable {
-    case call
     case timer
     case stopwatch
     /// Memory and CPU, when Stats is on and nothing else is happening. Never shares the notch:
@@ -12,10 +11,9 @@ public enum ActivityKind: String, CaseIterable, Sendable, Codable, Hashable {
     /// Lower comes first.
     public var priority: Int {
         switch self {
-        case .call: 0
-        case .timer: 1
-        case .stopwatch: 2
-        case .stats: 3
+        case .timer: 0
+        case .stopwatch: 1
+        case .stats: 2
         }
     }
 }

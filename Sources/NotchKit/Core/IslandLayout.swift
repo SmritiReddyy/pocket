@@ -295,7 +295,6 @@ public struct LayoutEngine: Equatable, Sendable {
     private func baseContentHeight(for presentation: IslandPresentation, home: HomeContent) -> CGFloat? {
         switch presentation {
         case .expanded(.timer), .expanded(.stopwatch): IslandMetrics.ContentHeight.timer
-        case .expanded(.call): IslandMetrics.ContentHeight.call
         case .nook(let tab): (tab == .launcher ? IslandMetrics.Nook.launcherBody : IslandMetrics.Nook.body) + IslandMetrics.Nook.bodyTopInset
         case .alert(.timerFinished): IslandMetrics.ContentHeight.timerFinished
         case .drop: IslandMetrics.ContentHeight.drop

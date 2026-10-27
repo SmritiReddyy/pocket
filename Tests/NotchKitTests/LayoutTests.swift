@@ -18,7 +18,7 @@ struct NotchLayoutTests {
     @Test func everyShapeIsFusedToTheTopEdge() {
         let presentations: [IslandPresentation] = [
             .hidden(peek: false), .hidden(peek: true), .idle,
-            .compact(primary: .timer, secondary: .stopwatch), .expanded(.call), .home,
+            .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer), .home,
             .alert(.charging(level: 50, isCharging: true)), .alert(.timerFinished), .drop(targeted: true),
         ]
         for presentation in presentations {
@@ -82,7 +82,7 @@ struct NotchLayoutTests {
 
     @Test func expandedContentSitsBelowTheNotch() throws {
         let notch = try #require(screen.notch)
-        for presentation in [IslandPresentation.expanded(.call), .expanded(.timer), .drop(targeted: false), .alert(.timerFinished)] {
+        for presentation in [IslandPresentation.expanded(.stopwatch), .expanded(.timer), .drop(targeted: false), .alert(.timerFinished)] {
             let result = layout(presentation)
             #expect(result.content.minY >= notch.maxY)
             #expect(result.cameraGap == 0)
@@ -130,7 +130,7 @@ struct NotchLayoutTests {
         let engine = LayoutEngine(screen: screen, appearance: extreme)
         let bounds = CGRect(origin: .zero, size: engine.windowSize)
         let presentations: [IslandPresentation] = [
-            .compact(primary: .timer, secondary: .call), .expanded(.call), .home, .alert(.headphones(name: "A", symbol: "airpods")),
+            .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer), .home, .alert(.headphones(name: "A", symbol: "airpods")),
             .alert(.timerFinished), .drop(targeted: false),
         ]
         for presentation in presentations {
@@ -180,7 +180,7 @@ struct VirtualNotchLayoutTests {
 
     @Test func everyShapeIsANotchFusedToTheTop() {
         let presentations: [IslandPresentation] = [
-            .hidden(peek: true), .idle, .compact(primary: .timer, secondary: .stopwatch), .expanded(.call),
+            .hidden(peek: true), .idle, .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer),
             .home, .alert(.charging(level: 50, isCharging: true)), .drop(targeted: true),
         ]
         for presentation in presentations {
@@ -241,7 +241,7 @@ struct IslandPathTests {
 
     @Test func layoutAnimatableRoundTrip() {
         var layout = LayoutEngine(screen: .sample, appearance: .standard)
-            .layout(for: .compact(primary: .timer, secondary: .call), home: HomeContent(), hovering: false)
+            .layout(for: .compact(primary: .timer, secondary: .stopwatch), home: HomeContent(), hovering: false)
         let original = layout
         layout.animatableData = original.animatableData
         #expect(layout == original)
