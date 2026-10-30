@@ -153,6 +153,9 @@ struct RichTextEditor: NSViewRepresentable {
                 if value == nil { note.addAttribute(.font, value: NSFont.systemFont(ofSize: parent.fontSize), range: range) }
             }
             textView.textStorage?.setAttributedString(note)
+            // Undo steps from before a reload (say, the note was saved and cleared) would point at
+            // text that's gone.
+            textView.undoManager?.removeAllActions()
         }
 
         func textDidChange(_ notification: Notification) {
@@ -162,10 +165,54 @@ struct RichTextEditor: NSViewRepresentable {
     }
 }
 
-/// Tells SwiftUI when it gains or loses the keyboard, and turns Escape into "close".
-private final class FocusTextView: NSTextView {
+/// Tells SwiftUI when it gains or loses the keyboard, turns Escape into "close", and handles
+/// copy, cut, paste, select all, undo and redo itself, since Pocket has no Edit menu to do it.
+final class FocusTextView: NSTextView {
     var onFocus: (Bool) -> Void = { _ in }
     var onEscape: () -> Void = {}
+
+    enum EditCommand: Equatable {
+        case copy, cut, paste, selectAll, undo, redo
+    }
+
+    /// ⌘ or Ctrl with C, X, V, A or Z (and Shift-Z to redo). Anything with Option is left alone,
+    /// so the ⌃⌥ shortcuts keep opening the grid's features.
+    static func editCommand(key: String?, modifiers: NSEvent.ModifierFlags) -> EditCommand? {
+        let flags = modifiers.intersection([.command, .control, .option, .shift])
+        guard !flags.contains(.option), flags.contains(.command) != flags.contains(.control) else { return nil }
+        let shifted = flags.contains(.shift)
+        switch key?.lowercased() {
+        case "c" where !shifted: return .copy
+        case "x" where !shifted: return .cut
+        case "v" where !shifted: return .paste
+        case "a" where !shifted: return .selectAll
+        case "z": return shifted ? .redo : .undo
+        default: return nil
+        }
+    }
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.type == .keyDown, window?.firstResponder === self, perform(event) { return true }
+        return super.performKeyEquivalent(with: event)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if !perform(event) { super.keyDown(with: event) }
+    }
+
+    private func perform(_ event: NSEvent) -> Bool {
+        guard let command = Self.editCommand(key: event.charactersIgnoringModifiers, modifiers: event.modifierFlags) else { return false }
+        switch command {
+        case .copy: copy(nil)
+        case .cut: cut(nil)
+        // Plain text, so pasted words take the note's style instead of a web page's dark text.
+        case .paste: pasteAsPlainText(nil)
+        case .selectAll: selectAll(nil)
+        case .undo: if undoManager?.canUndo == true { undoManager?.undo() }
+        case .redo: if undoManager?.canRedo == true { undoManager?.redo() }
+        }
+        return true
+    }
 
     override func becomeFirstResponder() -> Bool {
         let accepted = super.becomeFirstResponder()

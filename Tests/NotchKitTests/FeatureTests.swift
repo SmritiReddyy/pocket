@@ -449,3 +449,39 @@ struct AppleNotesExportTests {
         #expect(exporter.state == .idle)
     }
 }
+
+@MainActor
+@Suite("Scratchpad shortcuts")
+struct ScratchpadShortcutTests {
+    private func command(_ key: String, _ modifiers: NSEvent.ModifierFlags) -> FocusTextView.EditCommand? {
+        FocusTextView.editCommand(key: key, modifiers: modifiers)
+    }
+
+    @Test func commandAndControlBothWork() {
+        for modifier: NSEvent.ModifierFlags in [.command, .control] {
+            #expect(command("c", modifier) == .copy)
+            #expect(command("x", modifier) == .cut)
+            #expect(command("v", modifier) == .paste)
+            #expect(command("a", modifier) == .selectAll)
+            #expect(command("z", modifier) == .undo)
+            #expect(command("z", modifier.union(.shift)) == .redo)
+            #expect(command("Z", modifier.union(.shift)) == .redo, "Shift can arrive as a capital letter")
+        }
+    }
+
+    @Test func othersAreLeftAlone() {
+        #expect(command("c", []) == nil, "plain typing")
+        #expect(command("b", [.control, .option]) == nil, "⌃⌥B still opens Clipboard")
+        #expect(command("c", [.command, .control]) == nil)
+        #expect(command("c", [.command, .shift]) == nil)
+        #expect(command("q", .command) == nil)
+    }
+
+    @Test func emptyNotesAreNotSavedOrCleared() {
+        let exporter = AppleNotesExporter()
+        var cleared = false
+        exporter.save(NSAttributedString(string: " ")) { cleared = true }
+        #expect(exporter.state == .idle)
+        #expect(!cleared)
+    }
+}

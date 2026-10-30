@@ -24,8 +24,9 @@ public final class AppleNotesExporter {
 
     public init() {}
 
-    /// Adds the note to Quick Notes, making the folder if it isn't there.
-    public func save(_ note: NSAttributedString) {
+    /// Adds the note to Quick Notes, making the folder if it isn't there. `onSaved` runs only
+    /// once Notes has the note.
+    public func save(_ note: NSAttributedString, onSaved: @escaping @MainActor () -> Void = {}) {
         guard state != .saving else { return }
         guard !note.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         resetTask?.cancel()
@@ -37,6 +38,7 @@ public final class AppleNotesExporter {
             switch result {
             case .success:
                 self.state = .saved
+                onSaved()
             case .failure(.notAllowed):
                 self.state = .notAllowed
             case .failure(.other(let message)):

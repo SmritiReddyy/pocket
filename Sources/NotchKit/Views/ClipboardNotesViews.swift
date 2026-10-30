@@ -197,7 +197,8 @@ private struct SaveToNotesButton: View {
             if exporter.state == .notAllowed {
                 exporter.openAutomationSettings()
             } else {
-                exporter.save(model.notes.attributedText)
+                // The note is in Notes now, so the scratchpad starts fresh.
+                exporter.save(model.notes.attributedText) { model.notes.clear() }
             }
         } label: {
             ZStack {
@@ -229,7 +230,7 @@ private struct SaveToNotesButton: View {
 
     private static func help(_ state: AppleNotesExporter.State) -> String {
         switch state {
-        case .idle, .saving: String(localized: "Save to Notes › \(AppleNotesExporter.folderName)")
+        case .idle, .saving: String(localized: "Save to Notes › \(AppleNotesExporter.folderName) and clear the scratchpad")
         case .saved: String(localized: "Saved to \(AppleNotesExporter.folderName)")
         case .notAllowed: String(localized: "Pocket isn't allowed to use Notes. Click to open Privacy & Security › Automation.")
         case .failed(let message): String(localized: "Couldn't save to Notes: \(message)")
