@@ -195,9 +195,10 @@ public final class IslandWindowController {
     /// The panel never activates the app, so the app you were in stays in front.
     private func observeKeyboard() {
         let wantsKeyboard = isActive && model.presentation == .notes
-        // The elongated Home has Notes and To-dos inline: the panel may take the keyboard, but
-        // only once you click into one of them, so the app you were in keeps it until then.
-        let mayType = isActive && model.presentation == .home && model.settings.appearance.nookLayout == .elongated
+        // Home can have the scratchpad inline (and the elongated Home has To-dos too): the panel
+        // may take the keyboard, but only once you click into one, so the app you were in keeps
+        // it until then.
+        let mayType = isActive && model.presentation == .home && homeHasTyping
         if wantsKeyboard {
             panel.acceptsKeyboard = true
             panel.makeKey()
@@ -211,10 +212,15 @@ public final class IslandWindowController {
         }
         withObservationTracking {
             _ = isActive && model.presentation == .notes
-            _ = model.presentation == .home && model.settings.appearance.nookLayout == .elongated
+            _ = model.presentation == .home && homeHasTyping
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in self?.observeKeyboard() }
         }
+    }
+
+    /// Home shows something you can type into: the scratchpad card, or the elongated layout.
+    private var homeHasTyping: Bool {
+        model.settings.appearance.nookLayout == .elongated || model.homeCards.contains(.notes)
     }
 
     private func observeEnvironment() {
