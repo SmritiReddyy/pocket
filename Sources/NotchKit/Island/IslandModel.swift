@@ -12,6 +12,8 @@ public final class IslandModel {
     public let calendar: CalendarService
     public let clipboard: ClipboardMonitor
     public let notes: NotesStore
+    /// Saves the scratchpad into the Notes app.
+    public let notesApp = AppleNotesExporter()
     public let stopwatch: StopwatchService
     public let keepAwake = KeepAwakeService()
     public let reminders = RemindersService()

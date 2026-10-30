@@ -409,3 +409,43 @@ struct PeekingFaceTests {
         #expect(!SettingsStore(defaults: defaults).appearance.peekingFace)
     }
 }
+
+@Suite("Save to Notes")
+struct AppleNotesExportTests {
+    private let base = NSFont.systemFont(ofSize: 13)
+
+    @Test func linesBecomeDivsAndTextIsEscaped() {
+        let note = NSAttributedString(string: "Call Sam <3\n\nBuy milk & eggs", attributes: [.font: base, .foregroundColor: NSColor.white])
+        #expect(AppleNotesExporter.html(from: note)
+            == "<div>Call Sam &lt;3</div><div><br></div><div>Buy milk &amp; eggs</div>")
+    }
+
+    @Test func formattingIsKept() {
+        let note = NSMutableAttributedString(string: "Plain ", attributes: [.font: base])
+        let bold = NSFontManager.shared.convert(base, toHaveTrait: .boldFontMask)
+        note.append(NSAttributedString(string: "bold", attributes: [.font: bold]))
+        note.append(NSAttributedString(string: " big", attributes: [.font: NSFont.systemFont(ofSize: 18)]))
+        note.append(NSAttributedString(string: " under", attributes: [.font: base, .underlineStyle: NSUnderlineStyle.single.rawValue]))
+        note.append(NSAttributedString(string: " blue", attributes: [.font: base, .foregroundColor: NSColor(red: 10 / 255, green: 132 / 255, blue: 1, alpha: 1)]))
+        let html = AppleNotesExporter.html(from: note)
+        #expect(html.hasPrefix("<div>Plain "))
+        #expect(html.contains("<b>bold</b>"))
+        #expect(html.contains("font-size: 18px\"> big</span>"))
+        #expect(html.contains("<u> under</u>"))
+        #expect(html.contains("color: #0A84FF\"> blue</span>"))
+        #expect(!html.contains("#FFFFFF"), "the notch's white text isn't carried into Notes")
+    }
+
+    @Test func permissionErrorsAreRecognised() {
+        #expect(AppleNotesExporter.classify("execution error: Not authorised to send Apple events to Notes. (-1743)") == .notAllowed)
+        #expect(AppleNotesExporter.classify("execution error: Notes got an error: Can’t make folder. (-10000)") == .other("execution error: Notes got an error: Can’t make folder. (-10000)"))
+        #expect(AppleNotesExporter.classify("  ") == .other("Notes didn't respond."))
+    }
+
+    @MainActor
+    @Test func emptyNotesAreNotSaved() {
+        let exporter = AppleNotesExporter()
+        exporter.save(NSAttributedString(string: "  \n "))
+        #expect(exporter.state == .idle)
+    }
+}

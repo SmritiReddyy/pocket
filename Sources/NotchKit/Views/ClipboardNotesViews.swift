@@ -174,6 +174,7 @@ struct NoteCard: View {
                 FormatButton(label: "B", weight: .heavy, help: "Bold") { controller.toggleBold() }
                 FormatButton(label: "I", italic: true, help: "Italic") { controller.toggleItalic() }
                 FormatButton(label: "U", underline: true, help: "Underline") { controller.toggleUnderline() }
+                SaveToNotesButton(model: model)
             }
             .padding(.horizontal, 4 * s)
             .padding(.bottom, 3 * s)
@@ -181,6 +182,58 @@ struct NoteCard: View {
         .padding(.top, 6 * s)
         .padding(.horizontal, 4 * s)
         .background(RoundedRectangle(cornerRadius: 12 * s, style: .continuous).fill(Color.white.opacity(0.08)))
+    }
+}
+
+/// Adds the scratchpad as a new note in Notes › Quick Notes, and shows how that went.
+private struct SaveToNotesButton: View {
+    let model: IslandModel
+    @State private var isHovering = false
+    @Environment(\.notchScale) private var s
+
+    var body: some View {
+        let exporter = model.notesApp
+        Button {
+            if exporter.state == .notAllowed {
+                exporter.openAutomationSettings()
+            } else {
+                exporter.save(model.notes.attributedText)
+            }
+        } label: {
+            ZStack {
+                switch exporter.state {
+                case .saving:
+                    ProgressView().controlSize(.mini)
+                case .saved:
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(NotchColor.green)
+                case .notAllowed, .failed:
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(NotchColor.yellow)
+                case .idle:
+                    Image(systemName: "note.text.badge.plus")
+                        .foregroundStyle(.white.opacity(model.notes.isEmpty ? 0.3 : 0.85))
+                }
+            }
+            .font(.system(size: 11 * s, weight: .semibold))
+            .frame(width: 22 * s, height: 22 * s)
+            .background(Circle().fill(Color.white.opacity(isHovering ? 0.12 : 0)))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableButtonStyle())
+        .disabled(model.notes.isEmpty && exporter.state == .idle)
+        .onHover { isHovering = $0 }
+        .help(Self.help(exporter.state))
+        .accessibilityLabel(Text("Save to Notes"))
+    }
+
+    private static func help(_ state: AppleNotesExporter.State) -> String {
+        switch state {
+        case .idle, .saving: String(localized: "Save to Notes › \(AppleNotesExporter.folderName)")
+        case .saved: String(localized: "Saved to \(AppleNotesExporter.folderName)")
+        case .notAllowed: String(localized: "Pocket isn't allowed to use Notes. Click to open Privacy & Security › Automation.")
+        case .failed(let message): String(localized: "Couldn't save to Notes: \(message)")
+        }
     }
 }
 
