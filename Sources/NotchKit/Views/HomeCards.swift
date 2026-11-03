@@ -17,11 +17,13 @@ struct HomeCardView: View {
     }
 }
 
-/// A soft grey card with a title that opens the feature's own panel.
+/// A soft grey card with a title that opens the feature's own panel, and room for a control
+/// on the right of the title.
 private struct HomeCardFrame<Content: View>: View {
     let title: LocalizedStringKey
     let symbol: String
     let tint: Color
+    var accessory: AnyView?
     let open: () -> Void
     @ViewBuilder var content: Content
     @State private var isHovering = false
@@ -45,6 +47,8 @@ private struct HomeCardFrame<Content: View>: View {
             }
             .buttonStyle(PressableButtonStyle())
             .onHover { isHovering = $0 }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .trailing) { accessory }
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -78,7 +82,10 @@ private struct RemindersHomeCard: View {
 
     var body: some View {
         let reminders = model.reminders
-        HomeCardFrame(title: "Reminders", symbol: "checklist", tint: NotchColor.blue) {
+        HomeCardFrame(
+            title: "Reminders", symbol: "checklist", tint: NotchColor.blue,
+            accessory: reminders.access == .granted ? AnyView(ReminderListMenu(model: model, compact: true)) : nil
+        ) {
             model.open(.reminders)
         } content: {
             switch reminders.access {
@@ -88,7 +95,7 @@ private struct RemindersHomeCard: View {
                 prompt("Reminders access is off.", button: "Open Settings") { reminders.openPrivacySettings() }
             case .granted:
                 if reminders.items.isEmpty {
-                    Text("Nothing left for today")
+                    Text(ReminderListMenu.emptyText(reminders.selectedList))
                         .font(.system(size: 11 * s, weight: .medium))
                         .foregroundStyle(NotchColor.secondaryText)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

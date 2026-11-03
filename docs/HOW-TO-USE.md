@@ -26,6 +26,7 @@ second and it slides down.
 - **📝 Scratchpad** — just start typing. Colour, size, bold, italic and underline sit at the
   bottom. It saves as you go.
 - **✅ Reminders** — today's to-dos. Tick the circle to finish one. Hit **Connect** the first time.
+  Click the list name in the card's corner to show one of your lists instead.
 - **📋 Clipboard** — your last three copies. Click one to copy it again (passwords are skipped,
   nothing is saved to disk).
 

@@ -485,3 +485,33 @@ struct ScratchpadShortcutTests {
         #expect(!cleared)
     }
 }
+
+@Suite("Reminders lists")
+struct ReminderListTests {
+    @Test func laterDaysShowTheirDate() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 3, hour: 9)))
+        let tomorrow = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 5, hour: 15)))
+        let item = ReminderItem(id: "1", title: "Pay rent", due: tomorrow)
+        let label = try #require(ReminderRules.label(for: item, at: now, calendar: calendar))
+        #expect(label.contains("5"), "a future day shows its date, not just a time")
+        #expect(ReminderRules.label(for: ReminderItem(id: "2", title: "No date", due: nil), at: now, calendar: calendar) == nil)
+    }
+
+    @MainActor
+    @Test func emptyTextNamesTheList() {
+        #expect(ReminderListMenu.emptyText(nil) == "Nothing left for today")
+        #expect(ReminderListMenu.emptyText(ReminderList(id: "g", title: "Groceries")) == "Nothing left in Groceries")
+    }
+
+    @MainActor
+    @Test func listChoicePersists() {
+        let defaults = UserDefaults(suiteName: "ReminderListTests.\(UUID().uuidString)")!
+        let store = SettingsStore(defaults: defaults)
+        #expect(store.remindersListID == nil, "Today is the default")
+        store.remindersListID = "groceries"
+        #expect(SettingsStore(defaults: defaults).remindersListID == "groceries")
+        store.remindersListID = nil
+        #expect(SettingsStore(defaults: defaults).remindersListID == nil)
+    }
+}

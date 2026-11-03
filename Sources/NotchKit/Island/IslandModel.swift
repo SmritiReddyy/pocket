@@ -107,6 +107,7 @@ public final class IslandModel {
     public func startServices() {
         calendar.start()
         if settings.clipboardEnabled { clipboard.start() }
+        reminders.listID = settings.remindersListID
         if settings.remindersEnabled { reminders.start() }
         if settings.keyboardShortcutsEnabled { hotKeys.register() }
         // This build doesn't update itself: upstream releases include Now Playing.
@@ -744,6 +745,7 @@ public final class IslandModel {
             _ = settings.clipboardEnabled
             _ = settings.notesEnabled
             _ = settings.remindersEnabled
+            _ = settings.remindersListID
             _ = settings.keyboardShortcutsEnabled
             _ = settings.checksForUpdates
         } onChange: { [weak self] in
@@ -757,6 +759,7 @@ public final class IslandModel {
                 if case .mirror = self.expandTarget, !self.settings.mirrorEnabled { self.collapse() }
                 if case .clipboard = self.expandTarget, !self.settings.clipboardEnabled { self.collapse() }
                 if case .notes = self.expandTarget, !self.settings.notesEnabled { self.collapse() }
+                self.reminders.listID = self.settings.remindersListID
                 if self.settings.remindersEnabled { self.reminders.start() } else { self.reminders.stop() }
                 if self.settings.keyboardShortcutsEnabled { self.hotKeys.register() } else { self.hotKeys.unregister() }
                 if self.settings.clipboardEnabled {

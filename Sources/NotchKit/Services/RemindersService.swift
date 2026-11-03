@@ -17,16 +17,32 @@ public struct ReminderItem: Equatable, Sendable, Identifiable {
     }
 }
 
+/// One of the user's lists in Reminders.
+public struct ReminderList: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var title: String
+    public var color: ColorMath.RGB
+
+    public init(id: String, title: String, color: ColorMath.RGB = .white) {
+        self.id = id
+        self.title = title
+        self.color = color
+    }
+}
+
 public enum ReminderRules {
     /// Overdue ones first, then by due time.
     public static func sorted(_ items: [ReminderItem]) -> [ReminderItem] {
         items.sorted { ($0.due ?? .distantFuture) < ($1.due ?? .distantFuture) }
     }
 
-    /// "Overdue", a time for today ("3:00 PM"), or nothing when there's no due time.
+    /// "Overdue", a time for today ("3:00 PM"), a day for later ("Nov 5"), or nothing when
+    /// there's no due date.
     public static func label(for item: ReminderItem, at now: Date, calendar: Calendar = .current) -> String? {
         guard let due = item.due else { return nil }
         if due < now, !calendar.isDate(due, inSameDayAs: now) { return String(localized: "Overdue") }
+        // A whole list can hold to-dos due on later days.
+        if !calendar.isDate(due, inSameDayAs: now) { return due.formatted(.dateTime.month(.abbreviated).day()) }
         let components = calendar.dateComponents([.hour, .minute], from: due)
         // All-day reminders come back at midnight; they have no time to show.
         if components.hour == 0, components.minute == 0 { return String(localized: "Today") }
@@ -34,8 +50,9 @@ public enum ReminderRules {
     }
 }
 
-/// Today's to-dos from Reminders: anything not done that's due by the end of today. Asks for
-/// access only when the user clicks Connect.
+/// To-dos from Reminders. By default, today's: anything not done that's due by the end of today,
+/// from every list. With a list picked, everything not done in that list. Asks for access only
+/// when the user clicks Connect.
 @MainActor
 @Observable
 public final class RemindersService {
@@ -47,6 +64,17 @@ public final class RemindersService {
 
     public private(set) var access: Access = .notAsked
     public private(set) var items: [ReminderItem] = []
+    /// The user's lists, by name.
+    public private(set) var lists: [ReminderList] = []
+    /// The list to show, or nil for today's to-dos from every list.
+    public var listID: String? {
+        didSet { if listID != oldValue { reload() } }
+    }
+
+    /// The picked list, while it still exists. A deleted list falls back to Today.
+    public var selectedList: ReminderList? {
+        lists.first { $0.id == listID }
+    }
 
     @ObservationIgnored private var store = EKEventStore()
     /// See CalendarService: macOS can report "not asked yet" for a while after the user allows it.
@@ -135,10 +163,21 @@ public final class RemindersService {
         access = currentAccess()
         guard isRunning, access == .granted else {
             items = []
+            lists = []
             return
         }
-        let endOfToday = Calendar.current.startOfDay(for: Date()).addingTimeInterval(24 * 3600)
-        let predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: endOfToday, calendars: nil)
+        let calendars = store.calendars(for: .reminder)
+        let fresh = calendars
+            .map { ReminderList(id: $0.calendarIdentifier, title: $0.title, color: Self.rgb($0.color)) }
+            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        if lists != fresh { lists = fresh }
+        let predicate: NSPredicate
+        if let listID, let list = calendars.first(where: { $0.calendarIdentifier == listID }) {
+            predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: [list])
+        } else {
+            let endOfToday = Calendar.current.startOfDay(for: Date()).addingTimeInterval(24 * 3600)
+            predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: endOfToday, calendars: nil)
+        }
         // EventKit calls back on a background queue, so this closure must not be tied to the main
         // actor (Swift stops the app if it is); only the result hops back.
         store.fetchReminders(matching: predicate) { @Sendable reminders in

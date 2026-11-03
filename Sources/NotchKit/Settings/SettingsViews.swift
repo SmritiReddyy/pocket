@@ -268,6 +268,7 @@ struct ActivitiesSettingsView: View {
 struct HomeSettingsView: View {
     @Bindable var settings: SettingsStore
     let calendar: CalendarService
+    let reminders: RemindersService
 
     var body: some View {
         Form {
@@ -282,6 +283,18 @@ struct HomeSettingsView: View {
                 IconToggle(title: "Clipboard", detail: "Text you copied recently. Passwords are skipped, nothing is saved", symbol: "doc.on.clipboard.fill", color: .orange, isOn: $settings.clipboardEnabled)
                 IconToggle(title: "Notes", detail: "A quick scratchpad, saved as you type", symbol: "note.text", color: .yellow, isOn: $settings.notesEnabled)
                 IconToggle(title: "Reminders", detail: "Today's to-dos, ticked off from the notch", symbol: "checklist", color: .blue, isOn: $settings.remindersEnabled)
+                if settings.remindersEnabled, !reminders.lists.isEmpty {
+                    Picker("Show", selection: Binding<String?>(
+                        get: { reminders.selectedList?.id },
+                        set: { settings.remindersListID = $0 }
+                    )) {
+                        Text("Today, from every list").tag(String?.none)
+                        Divider()
+                        ForEach(reminders.lists) { list in
+                            Text(list.title).tag(String?.some(list.id))
+                        }
+                    }
+                }
                 IconToggle(title: "Mirror", detail: "A quick camera preview", symbol: "person.crop.square.fill", color: .purple, isOn: $settings.mirrorEnabled)
             } header: {
                 Text("Tabs")

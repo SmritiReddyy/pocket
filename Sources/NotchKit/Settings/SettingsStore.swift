@@ -90,6 +90,8 @@ public final class SettingsStore {
     public var clipboardEnabled: Bool { didSet { defaults.set(clipboardEnabled, forKey: Key.clipboard) } }
     public var notesEnabled: Bool { didSet { defaults.set(notesEnabled, forKey: Key.notes) } }
     public var remindersEnabled: Bool { didSet { defaults.set(remindersEnabled, forKey: Key.reminders) } }
+    /// The Reminders list to show, or nil for today's to-dos from every list.
+    public var remindersListID: String? { didSet { defaults.set(remindersListID, forKey: Key.remindersList) } }
     /// ⌃⌥ shortcuts for the launcher's tiles.
     public var keyboardShortcutsEnabled: Bool { didSet { defaults.set(keyboardShortcutsEnabled, forKey: Key.keyboardShortcuts) } }
     /// Look for a new version on GitHub once a day.
@@ -153,6 +155,7 @@ public final class SettingsStore {
         clipboardEnabled = defaults.object(forKey: Key.clipboard) as? Bool ?? true
         notesEnabled = defaults.object(forKey: Key.notes) as? Bool ?? true
         remindersEnabled = defaults.object(forKey: Key.reminders) as? Bool ?? true
+        remindersListID = defaults.string(forKey: Key.remindersList)
         keyboardShortcutsEnabled = defaults.object(forKey: Key.keyboardShortcuts) as? Bool ?? true
         checksForUpdates = defaults.object(forKey: Key.checksForUpdates) as? Bool ?? true
         let focus = defaults.object(forKey: Key.focusMinutes) as? Int ?? 25
@@ -202,6 +205,7 @@ public final class SettingsStore {
         static let clipboard = "home.clipboard"
         static let notes = "home.notes"
         static let reminders = "home.reminders"
+        static let remindersList = "home.remindersList"
         static let keyboardShortcuts = "general.keyboardShortcuts"
         static let checksForUpdates = "general.checksForUpdates"
         static let focusMinutes = "timer.focusMinutes"

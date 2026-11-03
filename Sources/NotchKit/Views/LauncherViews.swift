@@ -182,6 +182,53 @@ private struct LauncherTile: View {
 
 // MARK: Reminders
 
+/// Picks what Reminders shows: today's to-dos from every list, or one list.
+struct ReminderListMenu: View {
+    let model: IslandModel
+    /// Just the list's name and a chevron, for the small Home card.
+    var compact = false
+    @Environment(\.notchScale) private var s
+
+    var body: some View {
+        let reminders = model.reminders
+        let selection = Binding<String?>(
+            get: { reminders.selectedList?.id },
+            set: { model.settings.remindersListID = $0 }
+        )
+        Menu {
+            Picker("Show", selection: selection) {
+                Text("Today").tag(String?.none)
+                if !reminders.lists.isEmpty { Divider() }
+                ForEach(reminders.lists) { list in
+                    Text(list.title).tag(String?.some(list.id))
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            HStack(spacing: 3 * s) {
+                Text(reminders.selectedList?.title ?? String(localized: "Today"))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: (compact ? 7 : 8) * s, weight: .bold))
+            }
+            .font(.system(size: (compact ? 10 : 11) * s, weight: .semibold))
+            .foregroundStyle(reminders.selectedList.map { NotchColor.accent($0.color) } ?? NotchColor.secondaryText)
+            .frame(maxWidth: (compact ? 74 : 140) * s, alignment: .trailing)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Choose which Reminders list to show")
+        .accessibilityLabel(Text("Reminders list"))
+    }
+
+    /// What an empty list says.
+    static func emptyText(_ list: ReminderList?) -> String {
+        list.map { String(localized: "Nothing left in \($0.title)") } ?? String(localized: "Nothing left for today")
+    }
+}
+
 /// Today's to-dos. Click the circle to tick one off.
 struct RemindersPanelBody: View {
     let model: IslandModel
@@ -199,17 +246,17 @@ struct RemindersPanelBody: View {
                 reminders.openPrivacySettings()
             }
         case .granted:
-            if reminders.items.isEmpty {
-                VStack(spacing: 6 * s) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.system(size: 20 * s, weight: .medium))
-                    Text("Nothing left for today")
-                        .font(.system(size: 12 * s, weight: .medium))
-                }
-                .foregroundStyle(NotchColor.secondaryText)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                HStack(alignment: .top, spacing: 12 * s) {
+            HStack(alignment: .top, spacing: 12 * s) {
+                if reminders.items.isEmpty {
+                    VStack(spacing: 6 * s) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 20 * s, weight: .medium))
+                        Text(ReminderListMenu.emptyText(reminders.selectedList))
+                            .font(.system(size: 12 * s, weight: .medium))
+                    }
+                    .foregroundStyle(NotchColor.secondaryText)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 2 * s) {
                             ForEach(reminders.items) { item in
@@ -221,6 +268,9 @@ struct RemindersPanelBody: View {
                             }
                         }
                     }
+                }
+                VStack(alignment: .trailing, spacing: 8 * s) {
+                    ReminderListMenu(model: model)
                     Button("Open Reminders") {
                         reminders.openRemindersApp()
                         model.collapse()
