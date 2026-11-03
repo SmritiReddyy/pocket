@@ -14,7 +14,11 @@ to use the app, see [How to use it](HOW-TO-USE.md).
 
 ## Build and run
 
-Needs Swift 6 (Xcode 16 or later). Built and tested with Xcode 26.4 on macOS 27.
+Needs Swift 6, from Xcode or just Apple's Command Line Tools (`xcode-select --install`).
+
+The scripts pick the SDK for you: some Command Line Tools updates ship an SDK that can't build
+SwiftUI on its own, so they use the newest one that can (`Scripts/sdk.sh`) and print which. Set
+`SDKROOT` to choose one yourself.
 
 ```bash
 git clone https://github.com/SmritiReddyy/pocket.git

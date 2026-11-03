@@ -180,7 +180,7 @@ public final class RemindersService {
         }
         // EventKit calls back on a background queue, so this closure must not be tied to the main
         // actor (Swift stops the app if it is); only the result hops back.
-        store.fetchReminders(matching: predicate) { @Sendable reminders in
+        store.fetchReminders(matching: predicate) { @Sendable [weak self] reminders in
             let fresh = (reminders ?? []).map { reminder in
                 ReminderItem(
                     id: reminder.calendarItemIdentifier,
@@ -189,7 +189,7 @@ public final class RemindersService {
                     color: Self.rgb(reminder.calendar?.color)
                 )
             }
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 let sorted = ReminderRules.sorted(fresh)
                 if self?.items != sorted { self?.items = sorted }
             }

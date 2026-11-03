@@ -10,7 +10,7 @@
 #   UNIVERSAL=1                 build for Apple silicon and Intel
 #   DIRECT=1                    compile with swiftc instead of SwiftPM (for a broken
 #                               Command Line Tools install where Package.swift won't link)
-#   DIRECT_SDK=path             SDK for DIRECT=1, default: the macOS 26.5 SDK
+#   SDKROOT=path                the SDK to build with, default: the first one that works
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -26,14 +26,8 @@ if [[ -n "$UPDATE_PUBLIC_KEY" && ! "$UPDATE_PUBLIC_KEY" =~ ^[A-Za-z0-9+/]{43}=$ 
     exit 1
 fi
 
-# Use the selected Xcode's SDK. A newer Command Line Tools SDK can contain
-# architectures that Xcode's linker doesn't know yet.
-DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
-export DEVELOPER_DIR
-XCODE_SDK="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-if [[ -z "${SDKROOT:-}" && -d "$XCODE_SDK" ]]; then
-    export SDKROOT="$XCODE_SDK"
-fi
+# Picks an SDK that can build SwiftUI (see sdk.sh) and sets SDKROOT.
+source "$ROOT/Scripts/sdk.sh"
 
 cd "$ROOT"
 echo "› Building ($CONFIG)…"
@@ -41,7 +35,7 @@ echo "› Building ($CONFIG)…"
 # SwiftPM's native build system and does not need an Xcode project or workspace.
 BUILD_FLAGS=(--build-system native -c "$CONFIG")
 if [[ "${DIRECT:-0}" == "1" ]]; then
-    SDK="${DIRECT_SDK:-/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk}"
+    SDK="$SDKROOT"
     [[ "$CONFIG" == "release" ]] && OPT=-O || OPT=-Onone
     BIN_DIR="$ROOT/.build/direct-$CONFIG"
     mkdir -p "$BIN_DIR/mods"
