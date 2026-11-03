@@ -18,7 +18,7 @@ struct ClipboardBody: View {
                         .font(.system(size: 20 * s, weight: .semibold))
                     Text("Text you copy shows up here")
                         .font(.system(size: 12 * s, weight: .medium))
-                    Text("Passwords are skipped and nothing is saved to disk.")
+                    Text("Passwords are skipped, nothing is saved to disk, and copies go after 48 hours.")
                         .font(.system(size: 10 * s))
                         .foregroundStyle(NotchColor.secondaryText.opacity(0.8))
                 }

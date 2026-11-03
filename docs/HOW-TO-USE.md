@@ -28,7 +28,7 @@ second and it slides down.
 - **✅ Reminders** — today's to-dos. Tick the circle to finish one. Hit **Connect** the first time.
   Click the list name in the card's corner to show one of your lists instead.
 - **📋 Clipboard** — your last three copies. Click one to copy it again (passwords are skipped,
-  nothing is saved to disk).
+  nothing is saved to disk, and copies disappear after 48 hours).
 
 Click any card's title to open its full panel. Don't want a card? Switch it off in
 Settings › Home and Home shrinks to fit.

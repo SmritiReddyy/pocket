@@ -1,6 +1,6 @@
 import Foundation
 
-/// Recently copied text, newest first. Kept in memory only.
+/// Recently copied text, newest first. Kept in memory only, and forgotten after two days.
 public struct ClipboardHistory: Equatable, Sendable {
     public struct Entry: Identifiable, Equatable, Sendable {
         public let id: UUID
@@ -15,6 +15,8 @@ public struct ClipboardHistory: Equatable, Sendable {
     public static let capacity = 20
     /// Longer copies are kept whole on the pasteboard but cut here, so the history stays small.
     public static let maximumLength = 20_000
+    /// Copies older than this are dropped. Copying one again from the history restarts its clock.
+    public static let maximumAge: TimeInterval = 48 * 3600
 
     public init() {}
 
@@ -29,6 +31,16 @@ public struct ClipboardHistory: Equatable, Sendable {
         if entries.count > Self.capacity {
             entries.removeLast(entries.count - Self.capacity)
         }
+        return true
+    }
+
+    /// Drops copies older than `maximumAge`. Returns true if any went.
+    @discardableResult
+    public mutating func removeExpired(now: Date = Date()) -> Bool {
+        let cutoff = now.addingTimeInterval(-Self.maximumAge)
+        // Only touch the list when something has expired, so watchers aren't told about nothing.
+        guard entries.contains(where: { $0.copiedAt < cutoff }) else { return false }
+        entries.removeAll { $0.copiedAt < cutoff }
         return true
     }
 

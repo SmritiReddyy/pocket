@@ -280,7 +280,7 @@ struct HomeSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                IconToggle(title: "Clipboard", detail: "Text you copied recently. Passwords are skipped, nothing is saved", symbol: "doc.on.clipboard.fill", color: .orange, isOn: $settings.clipboardEnabled)
+                IconToggle(title: "Clipboard", detail: "Text you copied in the last 48 hours. Passwords are skipped, nothing is saved", symbol: "doc.on.clipboard.fill", color: .orange, isOn: $settings.clipboardEnabled)
                 IconToggle(title: "Notes", detail: "A quick scratchpad, saved as you type", symbol: "note.text", color: .yellow, isOn: $settings.notesEnabled)
                 IconToggle(title: "Reminders", detail: "Today's to-dos, ticked off from the notch", symbol: "checklist", color: .blue, isOn: $settings.remindersEnabled)
                 if settings.remindersEnabled, !reminders.lists.isEmpty {

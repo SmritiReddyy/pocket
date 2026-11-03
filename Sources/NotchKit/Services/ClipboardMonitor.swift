@@ -3,7 +3,8 @@ import Observation
 
 /// Watches the pasteboard for copied text. macOS has no change notification, so it checks the
 /// change count a little more than once a second, which costs next to nothing. Copies marked
-/// private (passwords) are skipped, and nothing is written to disk.
+/// private (passwords) are skipped, nothing is written to disk, and copies older than 48 hours
+/// are dropped.
 @MainActor
 @Observable
 public final class ClipboardMonitor {
@@ -42,7 +43,8 @@ public final class ClipboardMonitor {
         history.removeAll()
     }
 
-    public func check() {
+    public func check(now: Date = Date()) {
+        history.removeExpired(now: now)
         let count = pasteboard.changeCount
         guard count != lastChangeCount else { return }
         lastChangeCount = count

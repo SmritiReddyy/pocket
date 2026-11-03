@@ -486,6 +486,32 @@ struct ScratchpadShortcutTests {
     }
 }
 
+@Suite("Clipboard expiry")
+struct ClipboardExpiryTests {
+    @Test func copiesGoAfterTwoDays() {
+        let start = Date(timeIntervalSince1970: 1_000_000)
+        var history = ClipboardHistory()
+        history.add("old", now: start)
+        history.add("new", now: start.addingTimeInterval(24 * 3600))
+        let early = history.removeExpired(now: start.addingTimeInterval(48 * 3600 - 1))
+        #expect(!early, "nothing is quite two days old yet")
+        #expect(history.entries.count == 2)
+        let late = history.removeExpired(now: start.addingTimeInterval(48 * 3600 + 1))
+        #expect(late)
+        #expect(history.entries.map(\.text) == ["new"])
+    }
+
+    @Test func copyingAgainRestartsTheClock() {
+        let start = Date(timeIntervalSince1970: 1_000_000)
+        var history = ClipboardHistory()
+        history.add("keep me", now: start)
+        history.add("keep me", now: start.addingTimeInterval(40 * 3600))
+        let removed = history.removeExpired(now: start.addingTimeInterval(50 * 3600))
+        #expect(!removed)
+        #expect(history.entries.map(\.text) == ["keep me"])
+    }
+}
+
 @Suite("Reminders lists")
 struct ReminderListTests {
     @Test func laterDaysShowTheirDate() throws {
