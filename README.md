@@ -6,6 +6,10 @@
 
 <p align="center"><b>A little pocket at the top of my Mac. 👖</b></p>
 
+<p align="center">
+  <img src="docs/images/home.png" alt="Pocket open under the notch with calendar, timers, scratchpad, reminders and clipboard" width="100%">
+</p>
+
 ---
 
 My MacBook's notch just sat there. Now it's a pocket: it pops open when something's happening
@@ -19,6 +23,12 @@ and tucks away when nothing is. Think iPhone Dynamic Island, but for my Mac.
 - 📅 your next **event** and ⏱️ one-tap **timers** and Focus sessions
 
 **Click it again** and it zips shut.
+
+Hover over it and a little face peeks out to say hi.
+
+<p align="center">
+  <img src="docs/images/peek.png" alt="A smiling face peeking out from under the notch" width="266">
+</p>
 
 It also gives you a heads-up before meetings, a file tray, a stopwatch, a camera mirror and
 Keep Awake. That's it: no music, no calls, no battery or volume pop-ups. Just the good stuff.
