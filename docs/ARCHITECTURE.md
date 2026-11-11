@@ -3,7 +3,6 @@
 ```
 Sources/
 ├── Pocket/main.swift           App entry point (starts AppDelegate)
-├── NotchMediaBridge/             Objective-C library loaded by /usr/bin/perl
 └── NotchKit/
     ├── Core/                     Pure logic, no AppKit: fully unit-tested
     │   ├── Presentation.swift      Activities, alerts, presentations, priority rules
@@ -12,27 +11,16 @@ Sources/
     │   ├── NotchAppearance.swift   User size/style settings and clamping
     │   ├── AlertQueue.swift        One alert at a time, with durations
     │   ├── CountdownTimer.swift    Timer maths with an injected clock
-    │   ├── PowerTransitions.swift  When to show charging / low-battery alerts
-    │   ├── NowPlayingInfo.swift    Track model + media-helper message parsing
-    │   ├── SystemClassifiers.swift Call apps, headphone symbols, liquid-effect maths
-    │   ├── SystemStats.swift       Stats readings: CPU, memory, network maths and labels
+    │   ├── SystemClassifiers.swift Liquid-effect maths
     │   ├── MeetingLinks.swift      Finds Meet, Zoom, Teams and Webex links in events
-    │   └── ColorMath.swift         Album-art tint
+    │   └── ColorMath.swift         Colour conversions for calendar and reminder tints
     ├── Services/                 System integrations
-    │   ├── MediaBridgeClient       Runs and restarts the media helper; parses its output
-    │   │                           and album-art tint off the main thread
-    │   ├── NowPlayingService       Track, artwork, controls, pause linger
     │   ├── TimerService            Timer + alarm sound + App Nap guard
-    │   ├── AudioRouteMonitor       Bluetooth headphones becoming the output
-    │   ├── PowerMonitor            IOKit power-source notifications
     │   ├── TrayStore               Up to 30 session-only references; generated shortcuts cleaned on clear/exit
     │   ├── ClipboardMonitor        Copied text, in memory only; skips private copies
     │   ├── NotesStore              The Notes scratchpad with its formatting (RTF), saved to preferences
     │   ├── TodoStore               The elongated layout's to-do list, saved to preferences
-    │   ├── CalendarService         EventKit: next event and 5-minute heads-ups
-    │   ├── StatsService            CPU, memory, disk and network every 2 s, only while Stats is on
-    │   ├── ShortcutsService        Lists and runs Shortcuts through /usr/bin/shortcuts
-    │   └── LevelMonitor            Volume (Core Audio) and brightness (DisplayServices) changes
+    │   └── CalendarService         EventKit: next event and 5-minute heads-ups
     ├── Island/
     │   ├── IslandModel             Single source of truth: state, gestures, alerts
     │   ├── IslandWindow            Non-activating panel + hosting view
@@ -57,12 +45,11 @@ Sources/
 ## Debug commands
 
 Debug builds listen for a distributed notification named `Pocket.debug`. Its object is a
-command: `timer:<seconds>`, `pause`, `cancel`, `home`, `expand`, `collapse`, `charging`,
-`lowbattery`, `headphones`, `drop`, `target`, `nodrop`, `peek`, `hover`, `unhover`, `swipe`,
+command: `timer:<seconds>`, `pause`, `cancel`, `home`, `expand`, `collapse`, `drop`, `target`, `nodrop`, `peek`, `hover`, `unhover`, `swipe`,
 `settings:<tab>`, `idle`, `dismiss`, `size:<small|medium|large>`, `welcome`,
 `dump` (writes the model state to `$TMPDIR/Pocket-debug.txt`), `tray`, `mirror`,
-`trayadd:<path>:<path>`, `volume:<0-1>`, `brightness:<0-1>`, `event`, `shortcutdone`. Example:
+`trayadd:<path>:<path>`, `event`. Example:
 
 ```bash
-osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("Pocket.debug", "charging", $(), true)'
+osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately("Pocket.debug", "event", $(), true)'
 ```

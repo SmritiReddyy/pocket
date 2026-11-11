@@ -145,7 +145,6 @@ private struct LauncherTile: View {
         case .scratchpad: "Scratchpad"
         case .mirror: "Camera Mirror"
         case .keepAwake: "Keep Awake"
-        case .stats: "Stats"
         }
     }
 
@@ -160,7 +159,6 @@ private struct LauncherTile: View {
         case .scratchpad: "note.text"
         case .mirror: "web.camera"
         case .keepAwake: live ? "cup.and.heat.waves.fill" : "cup.and.saucer"
-        case .stats: "gauge.with.dots.needle.33percent"
         }
     }
 
@@ -170,7 +168,6 @@ private struct LauncherTile: View {
         case .calendar: NotchColor.red
         case .reminders: NotchColor.blue
         case .keepAwake: NotchColor.yellow
-        case .stats: NotchColor.green
         default: .white
         }
     }
@@ -178,7 +175,6 @@ private struct LauncherTile: View {
     static func help(_ item: LauncherItem, live: Bool) -> String {
         switch item {
         case .keepAwake: live ? String(localized: "Your Mac won't sleep. Click to turn off.") : String(localized: "Stop your Mac from going to sleep")
-        case .stats: live ? String(localized: "Memory and CPU are showing in the notch. Click to turn off.") : String(localized: "Show memory and CPU in the notch")
         default: ""
         }
     }

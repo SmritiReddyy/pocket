@@ -84,21 +84,12 @@ public final class SettingsStore {
     public var timerSound: Bool { didSet { defaults.set(timerSound, forKey: Key.timerSound) } }
 
     public var timerEnabled: Bool { didSet { defaults.set(timerEnabled, forKey: Key.timer) } }
-    public var airDropEnabled: Bool { didSet { defaults.set(airDropEnabled, forKey: Key.airDrop) } }
-    public var chargingAlertsEnabled: Bool { didSet { defaults.set(chargingAlertsEnabled, forKey: Key.charging) } }
-    public var lowBatteryAlertsEnabled: Bool { didSet { defaults.set(lowBatteryAlertsEnabled, forKey: Key.lowBattery) } }
-    public var headphoneAlertsEnabled: Bool { didSet { defaults.set(headphoneAlertsEnabled, forKey: Key.headphones) } }
     public var trayEnabled: Bool { didSet { defaults.set(trayEnabled, forKey: Key.tray) } }
     public var mirrorEnabled: Bool { didSet { defaults.set(mirrorEnabled, forKey: Key.mirror) } }
     /// Keep a history of copied text (memory only, passwords skipped).
     public var clipboardEnabled: Bool { didSet { defaults.set(clipboardEnabled, forKey: Key.clipboard) } }
     public var notesEnabled: Bool { didSet { defaults.set(notesEnabled, forKey: Key.notes) } }
-    /// Show a heads-up when a download finishes. Off until asked for: macOS asks for Downloads access.
-    public var downloadsEnabled: Bool { didSet { defaults.set(downloadsEnabled, forKey: Key.downloads) } }
     public var remindersEnabled: Bool { didSet { defaults.set(remindersEnabled, forKey: Key.reminders) } }
-    /// Live memory and CPU beside the camera when nothing else is on, plus the Stats view.
-    /// Off until asked for, since it keeps the notch showing.
-    public var statsEnabled: Bool { didSet { defaults.set(statsEnabled, forKey: Key.stats) } }
     /// ⌃⌥ shortcuts for the launcher's tiles.
     public var keyboardShortcutsEnabled: Bool { didSet { defaults.set(keyboardShortcutsEnabled, forKey: Key.keyboardShortcuts) } }
     /// Look for a new version on GitHub once a day.
@@ -107,13 +98,7 @@ public final class SettingsStore {
     public var focusMinutes: Int { didSet { defaults.set(focusMinutes, forKey: Key.focusMinutes) } }
     public var breakMinutes: Int { didSet { defaults.set(breakMinutes, forKey: Key.breakMinutes) } }
     public var calendarEnabled: Bool { didSet { defaults.set(calendarEnabled, forKey: Key.calendar) } }
-    public var shortcutsEnabled: Bool { didSet { defaults.set(shortcutsEnabled, forKey: Key.shortcuts) } }
-    /// Shortcut names pinned to the Home tab, in order.
-    public var favoriteShortcuts: [String] { didSet { defaults.set(favoriteShortcuts, forKey: Key.favoriteShortcuts) } }
-    /// Show volume and brightness changes in the notch.
-    public var levelsEnabled: Bool { didSet { defaults.set(levelsEnabled, forKey: Key.levels) } }
 
-    public static let maximumFavoriteShortcuts = 4
     public static let focusChoices = [15, 25, 45, 50, 60]
     public static let breakChoices = [5, 10, 15]
 
@@ -162,18 +147,12 @@ public final class SettingsStore {
         display = (defaults.string(forKey: Key.display)).flatMap(DisplayChoice.init(rawValue:)) ?? .automatic
         timerSound = defaults.object(forKey: Key.timerSound) as? Bool ?? true
         timerEnabled = defaults.object(forKey: Key.timer) as? Bool ?? true
-        airDropEnabled = defaults.object(forKey: Key.airDrop) as? Bool ?? true
-        chargingAlertsEnabled = defaults.object(forKey: Key.charging) as? Bool ?? true
-        lowBatteryAlertsEnabled = defaults.object(forKey: Key.lowBattery) as? Bool ?? true
-        headphoneAlertsEnabled = defaults.object(forKey: Key.headphones) as? Bool ?? true
         hasShownWelcome = defaults.bool(forKey: Key.welcome)
         trayEnabled = defaults.object(forKey: Key.tray) as? Bool ?? true
         mirrorEnabled = defaults.object(forKey: Key.mirror) as? Bool ?? true
         clipboardEnabled = defaults.object(forKey: Key.clipboard) as? Bool ?? true
         notesEnabled = defaults.object(forKey: Key.notes) as? Bool ?? true
-        downloadsEnabled = defaults.object(forKey: Key.downloads) as? Bool ?? false
         remindersEnabled = defaults.object(forKey: Key.reminders) as? Bool ?? true
-        statsEnabled = defaults.object(forKey: Key.stats) as? Bool ?? false
         keyboardShortcutsEnabled = defaults.object(forKey: Key.keyboardShortcuts) as? Bool ?? true
         checksForUpdates = defaults.object(forKey: Key.checksForUpdates) as? Bool ?? true
         let focus = defaults.object(forKey: Key.focusMinutes) as? Int ?? 25
@@ -181,21 +160,6 @@ public final class SettingsStore {
         let rest = defaults.object(forKey: Key.breakMinutes) as? Int ?? 5
         breakMinutes = Self.breakChoices.contains(rest) ? rest : 5
         calendarEnabled = defaults.object(forKey: Key.calendar) as? Bool ?? true
-        shortcutsEnabled = defaults.object(forKey: Key.shortcuts) as? Bool ?? true
-        favoriteShortcuts = Array((defaults.stringArray(forKey: Key.favoriteShortcuts) ?? []).prefix(Self.maximumFavoriteShortcuts))
-        levelsEnabled = defaults.object(forKey: Key.levels) as? Bool ?? true
-    }
-
-    /// Pins or unpins a shortcut on the Home tab. Returns false when the list is full.
-    @discardableResult
-    public func toggleFavorite(_ name: String) -> Bool {
-        if let index = favoriteShortcuts.firstIndex(of: name) {
-            favoriteShortcuts.remove(at: index)
-            return true
-        }
-        guard favoriteShortcuts.count < Self.maximumFavoriteShortcuts else { return false }
-        favoriteShortcuts.append(name)
-        return true
     }
 
     /// The elongated layout ships in 1.4.0. Until then it's only in debug builds, for testing.
@@ -232,25 +196,16 @@ public final class SettingsStore {
         static let display = "general.display"
         static let timerSound = "timer.sound"
         static let timer = "activity.timer"
-        static let airDrop = "activity.airDrop"
-        static let charging = "alert.charging"
-        static let lowBattery = "alert.lowBattery"
-        static let headphones = "alert.headphones"
         static let welcome = "app.hasShownWelcome"
         static let tray = "home.tray"
         static let mirror = "home.mirror"
         static let clipboard = "home.clipboard"
         static let notes = "home.notes"
-        static let downloads = "alert.downloads"
         static let reminders = "home.reminders"
-        static let stats = "home.stats"
         static let keyboardShortcuts = "general.keyboardShortcuts"
         static let checksForUpdates = "general.checksForUpdates"
         static let focusMinutes = "timer.focusMinutes"
         static let breakMinutes = "timer.breakMinutes"
         static let calendar = "home.calendar"
-        static let shortcuts = "home.shortcuts"
-        static let favoriteShortcuts = "home.favoriteShortcuts"
-        static let levels = "alert.levels"
     }
 }

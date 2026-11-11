@@ -20,8 +20,8 @@ and tucks away when nothing is. Think iPhone Dynamic Island, but for my Mac.
 
 **Click it again** and it zips shut.
 
-It also quietly handles charging, low battery, AirPods, volume and brightness, finished
-downloads, a file tray, AirDrop, a camera mirror, Keep Awake and CPU/memory stats.
+It also gives you a heads-up before meetings, a file tray, a stopwatch, a camera mirror and
+Keep Awake. That's it: no music, no calls, no battery or volume pop-ups. Just the good stuff.
 
 No account, no tracking, never phones home. 🔒
 
@@ -40,4 +40,5 @@ Drag `build/Pocket.app` into Applications, open it, and you're in.
 ## Credit where it's due
 
 Built on [Dynamic Notch](https://github.com/shandilyaswagat/dynamic_notch) by Swagat Shandilya.
-I stripped out music and calls, made a second click close the notch and packed more onto Home.
+I stripped it down to what I actually use, made a second click close the notch, packed more onto
+Home and added a face that peeks out to say hi.

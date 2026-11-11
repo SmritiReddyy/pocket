@@ -8,40 +8,40 @@ struct AlertQueueTests {
 
     @Test func showsOneAtATimeInOrder() {
         var queue = AlertQueue()
-        queue.enqueue(.charging(level: 50, isCharging: true), now: start)
-        queue.enqueue(.headphones(name: "AirPods", symbol: "airpods"), now: start)
+        queue.enqueue(.upcomingEvent(title: "Event 50", minutes: 5), now: start)
+        queue.enqueue(.welcome, now: start)
         #expect(queue.current == nil)
         let result1 = queue.promote(now: start, allowNonUrgent: true)
         #expect(result1)
-        #expect(queue.current == .charging(level: 50, isCharging: true))
+        #expect(queue.current == .upcomingEvent(title: "Event 50", minutes: 5))
         let result2 = queue.promote(now: start, allowNonUrgent: true)
         #expect(!result2, "only one at a time")
-        #expect(queue.expiry == start.addingTimeInterval(3))
-        let result3 = queue.expire(now: start.addingTimeInterval(2.9))
+        #expect(queue.expiry == start.addingTimeInterval(8))
+        let result3 = queue.expire(now: start.addingTimeInterval(7.9))
         #expect(!result3)
-        let result4 = queue.expire(now: start.addingTimeInterval(3))
+        let result4 = queue.expire(now: start.addingTimeInterval(8))
         #expect(result4)
-        let result5 = queue.promote(now: start.addingTimeInterval(3), allowNonUrgent: true)
+        let result5 = queue.promote(now: start.addingTimeInterval(8), allowNonUrgent: true)
         #expect(result5)
-        #expect(queue.current?.kind == .headphones)
+        #expect(queue.current?.kind == .app)
     }
 
     @Test func sameKindReplaces() {
         var queue = AlertQueue()
-        queue.enqueue(.lowBattery(level: 20), now: start)
-        queue.enqueue(.charging(level: 19, isCharging: true), now: start)
-        #expect(queue.pending == [.charging(level: 19, isCharging: true)])
+        queue.enqueue(.upcomingEvent(title: "Event 20", minutes: 5), now: start)
+        queue.enqueue(.upcomingEvent(title: "Event 19", minutes: 5), now: start)
+        #expect(queue.pending == [.upcomingEvent(title: "Event 19", minutes: 5)])
         queue.promote(now: start, allowNonUrgent: true)
         let later = start.addingTimeInterval(2)
-        let result6 = queue.enqueue(.charging(level: 20, isCharging: true), now: later)
+        let result6 = queue.enqueue(.upcomingEvent(title: "Event 20", minutes: 5), now: later)
         #expect(result6, "visible alert updated in place")
-        #expect(queue.current == .charging(level: 20, isCharging: true))
-        #expect(queue.expiry == later.addingTimeInterval(3), "timer restarts")
+        #expect(queue.current == .upcomingEvent(title: "Event 20", minutes: 5))
+        #expect(queue.expiry == later.addingTimeInterval(8), "timer restarts")
     }
 
     @Test func nonUrgentWaitsWhileExpanded() {
         var queue = AlertQueue()
-        queue.enqueue(.charging(level: 50, isCharging: true), now: start)
+        queue.enqueue(.upcomingEvent(title: "Event 50", minutes: 5), now: start)
         queue.enqueue(.timerFinished, now: start)
         let result7 = queue.promote(now: start, allowNonUrgent: false)
         #expect(result7)
@@ -56,17 +56,17 @@ struct AlertQueueTests {
 
     @Test func urgentAlertTakesOverAndTheOtherWaits() {
         var queue = AlertQueue()
-        queue.enqueue(.charging(level: 50, isCharging: true), now: start)
+        queue.enqueue(.upcomingEvent(title: "Event 50", minutes: 5), now: start)
         queue.promote(now: start, allowNonUrgent: true)
         let later = start.addingTimeInterval(1)
         let changed = queue.enqueue(.timerFinished, now: later)
         #expect(changed)
         #expect(queue.current == .timerFinished)
-        #expect(queue.pending.first == .charging(level: 50, isCharging: true), "interrupted alert goes back to the front")
+        #expect(queue.pending.first == .upcomingEvent(title: "Event 50", minutes: 5), "interrupted alert goes back to the front")
         queue.dismissCurrent()
         let promoted = queue.promote(now: later, allowNonUrgent: true)
         #expect(promoted)
-        #expect(queue.current == .charging(level: 50, isCharging: true))
+        #expect(queue.current == .upcomingEvent(title: "Event 50", minutes: 5))
     }
 
     @Test func urgentDoesNotDisplaceUrgent() {
@@ -82,10 +82,10 @@ struct AlertQueueTests {
         var queue = AlertQueue()
         queue.enqueue(.timerFinished, now: start)
         queue.promote(now: start, allowNonUrgent: true)
-        queue.enqueue(.lowBattery(level: 10), now: start)
+        queue.enqueue(.upcomingEvent(title: "Event 10", minutes: 5), now: start)
         queue.removeAll(of: .timer)
         #expect(queue.current == nil)
-        #expect(queue.pending == [.lowBattery(level: 10)])
+        #expect(queue.pending == [.upcomingEvent(title: "Event 10", minutes: 5)])
     }
 }
 
@@ -139,40 +139,6 @@ struct CountdownTimerTests {
     }
 }
 
-@Suite("Battery alerts")
-struct PowerTransitionTests {
-    func snapshot(_ level: Int, ac: Bool, charging: Bool = false, battery: Bool = true) -> PowerSnapshot {
-        PowerSnapshot(hasBattery: battery, level: level, isOnAC: ac, isCharging: charging, isLowPowerMode: false)
-    }
-
-    @Test func noAlertOnLaunch() {
-        #expect(PowerTransitions.alert(from: nil, to: snapshot(5, ac: false)) == nil)
-    }
-
-    @Test func pluggingInShowsCharging() {
-        #expect(PowerTransitions.alert(from: snapshot(40, ac: false), to: snapshot(40, ac: true, charging: true)) == .charging(level: 40, isCharging: true))
-        #expect(PowerTransitions.alert(from: snapshot(80, ac: false), to: snapshot(80, ac: true, charging: false)) == .charging(level: 80, isCharging: false))
-        #expect(PowerTransitions.alert(from: snapshot(40, ac: true), to: snapshot(41, ac: true, charging: true)) == nil)
-    }
-
-    @Test func lowBatteryAtThresholdsOnly() {
-        #expect(PowerTransitions.alert(from: snapshot(21, ac: false), to: snapshot(20, ac: false)) == .lowBattery(level: 20))
-        #expect(PowerTransitions.alert(from: snapshot(20, ac: false), to: snapshot(19, ac: false)) == nil)
-        #expect(PowerTransitions.alert(from: snapshot(11, ac: false), to: snapshot(10, ac: false)) == .lowBattery(level: 10))
-        #expect(PowerTransitions.alert(from: snapshot(25, ac: false), to: snapshot(8, ac: false)) == .lowBattery(level: 8))
-        #expect(PowerTransitions.alert(from: snapshot(21, ac: true), to: snapshot(20, ac: true)) == nil)
-    }
-
-    @Test func desktopsNeverAlert() {
-        #expect(PowerTransitions.alert(from: snapshot(100, ac: false, battery: false), to: snapshot(100, ac: true, battery: false)) == nil)
-    }
-
-    @Test func levelIsClamped() {
-        #expect(snapshot(140, ac: true).level == 100)
-        #expect(snapshot(-3, ac: true).level == 0)
-    }
-}
-
 @Suite("Time formatting")
 struct TimeFormattingTests {
     @Test func clock() {
@@ -201,14 +167,6 @@ struct TimeFormattingTests {
 
 @Suite("Classifiers and maths")
 struct ClassifierTests {
-    @Test func headphoneSymbols() {
-        #expect(HeadphoneSymbol.symbol(forDeviceName: "Sam’s AirPods Pro") == "airpodspro")
-        #expect(HeadphoneSymbol.symbol(forDeviceName: "AirPods Max") == "airpodsmax")
-        #expect(HeadphoneSymbol.symbol(forDeviceName: "AirPods") == "airpods")
-        #expect(HeadphoneSymbol.symbol(forDeviceName: "Beats Studio Pro") == "beats.headphones")
-        #expect(HeadphoneSymbol.symbol(forDeviceName: "WH-1000XM5") == "headphones")
-    }
-
     @Test func gooFadesOutWithoutAJump() {
         #expect(GooMath.blurRadius(strength: 0) == 0)
         #expect(GooMath.blurRadius(strength: 2) == GooMath.maximumBlur)

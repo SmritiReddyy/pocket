@@ -23,7 +23,6 @@ second and it slides down.
 - **📅 Calendar** — your next event. Click it for the month view. Hit **Connect** the first time.
 - **⏱️ Timer** — tap **5m** or **10m** to start, **Focus** for a Pomodoro, or **Timer ›** for any
   length or a stopwatch.
-- **⚡ Shortcuts** — your favourite Shortcuts as buttons. Pick them in Settings › Home.
 - **📝 Scratchpad** — just start typing. Colour, size, bold, italic and underline sit at the
   bottom. It saves as you go.
 - **✅ Reminders** — today's to-dos. Tick the circle to finish one. Hit **Connect** the first time.
@@ -35,11 +34,10 @@ Settings › Home and Home shrinks to fit.
 
 ## Tabs and the grid
 
-- **Tray** — drag files onto the notch and drop them on **Tray** to park them for later. Drag them
-  back out when you need them. Clears when you quit, and your originals are never touched.
-- **AirDrop** — drag files onto the notch and drop them on **AirDrop**.
+- **Tray** — drag files onto the notch to park them for later. Drag them back out when you need
+  them. Clears when you quit, and your originals are never touched.
 - **The grid** (⊞ top right) has everything else: Stopwatch, Mirror (a quick camera check),
-  Keep Awake, Stats and the full panels.
+  Keep Awake and the full panels.
 
 ## Keyboard shortcuts
 
@@ -56,19 +54,14 @@ All of them are **⌃⌥** (Control + Option) plus a letter:
 | N | Scratchpad |
 | W | Mirror |
 | Z | Keep Awake |
-| P | Stats |
 
 ## Live in the notch
 
 These pop up by themselves, no clicking needed:
 
-- ⏳ **Timers** counting down beside the camera
-- 🔋 **Charging** and **low battery**
-- 🎧 **AirPods** and headphones connecting
-- 🔊 **Volume** and ☀️ **brightness** changes
+- ⏳ **Timers** and the **stopwatch** running beside the camera, and a nudge when a timer's done
 - 📆 A heads-up **5 minutes before** a meeting
-- ⬇️ **Finished downloads** (switch it on in Settings)
-- 📊 **CPU and memory** when Stats is on and nothing else is going on
+- 👀 A little face peeking out when you hover (switch it off in Settings › Appearance)
 
 ## Handy settings
 

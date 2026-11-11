@@ -38,7 +38,7 @@ public enum IslandMetrics {
         public static let bodyTopInset: CGFloat = 10
         public static let row: CGFloat = 30
         public static let rowGap: CGFloat = 8
-        /// Home: the calendar, timer and shortcuts column when cards sit beside it. Just wide
+        /// Home: the calendar and timer column when cards sit beside it. Just wide
         /// enough for the timer row with two presets and the Focus button.
         public static let homeColumnWidth: CGFloat = 250
         public static let homeCardGap: CGFloat = 12
@@ -61,12 +61,10 @@ public enum IslandMetrics {
     /// Concave shoulders where the shape meets the top edge, like the real notch.
     public static let compactFlare: CGFloat = 6
     public static let expandedFlare: CGFloat = 10
-    /// Minimum width of each alert ear, so "Low Battery" fits beside the camera.
+    /// Minimum width of each alert ear, so short alerts fit beside the camera.
     public static let alertEarWidth: CGFloat = 128
-    /// Ear width for alerts that show a name (calendar events, shortcuts).
+    /// Ear width for alerts that show a name (calendar events).
     public static let namedAlertEarWidth: CGFloat = 156
-    /// Ear width for the volume and brightness indicator.
-    public static let levelEarWidth: CGFloat = 96
 
     /// Room around the content for the shadow.
     public static let windowMargin: CGFloat = 48
@@ -105,19 +103,17 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
 public struct HomeContent: Equatable, Sendable {
     public var hasEvent: Bool
     public var hasTimer: Bool
-    public var hasShortcuts: Bool
     /// Cards beside the column, in order.
     public var cards: [HomeCard]
 
-    public init(hasEvent: Bool = false, hasTimer: Bool = true, hasShortcuts: Bool = false, cards: [HomeCard] = []) {
+    public init(hasEvent: Bool = false, hasTimer: Bool = true, cards: [HomeCard] = []) {
         self.hasEvent = hasEvent
         self.hasTimer = hasTimer
-        self.hasShortcuts = hasShortcuts
         self.cards = cards
     }
 
     /// Every widget and card switched on.
-    public static let full = HomeContent(hasEvent: true, hasTimer: true, hasShortcuts: true, cards: HomeCard.allCases)
+    public static let full = HomeContent(hasEvent: true, hasTimer: true, cards: HomeCard.allCases)
 
     /// Home's width before scaling: the standard nook, widened to fit the cards beside the column.
     public var width: CGFloat {
@@ -127,9 +123,9 @@ public struct HomeContent: Equatable, Sendable {
         return max(Nook.width, 2 * Nook.sidePadding + Nook.homeColumnWidth + cardsWidth)
     }
 
-    /// Rows in the widget column (calendar, timer, shortcuts).
+    /// Rows in the widget column (calendar, timer).
     public var rowCount: Int {
-        [hasEvent, hasTimer, hasShortcuts].filter { $0 }.count
+        [hasEvent, hasTimer].filter { $0 }.count
     }
 
     /// Every row fits in the nook without scrolling.

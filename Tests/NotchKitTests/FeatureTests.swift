@@ -130,9 +130,7 @@ struct TrayTests {
         let defaults = UserDefaults(suiteName: "DropTests-" + UUID().uuidString)!
         let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: folder))
         model.settings.trayEnabled = false
-        model.settings.airDropEnabled = false
         #expect(!model.acceptDrop([file], into: .tray))
-        #expect(!model.acceptDrop([file], into: .airDrop))
         #expect(model.tray.items.isEmpty)
     }
 
@@ -184,8 +182,8 @@ struct TrayTests {
         #expect(!DocumentDragPolicy.hasMoved(from: .zero, to: CGPoint(x: 2, y: 0)))
         #expect(DocumentDragPolicy.hasMoved(from: .zero, to: CGPoint(x: 10, y: 0)))
         let content = CGRect(x: 0, y: 0, width: 200, height: 100)
-        #expect(DropPolicy.destination(at: CGPoint(x: 20, y: 20), content: content, tray: false, airDrop: false) == nil)
-        #expect(DropPolicy.destination(at: CGPoint(x: 150, y: 20), content: content, tray: true, airDrop: true) == .airDrop)
+        #expect(DropPolicy.destination(at: CGPoint(x: 20, y: 20), content: content, tray: false) == nil)
+        #expect(DropPolicy.destination(at: CGPoint(x: 150, y: 20), content: content, tray: true) == .tray)
     }
 
 }
@@ -231,7 +229,7 @@ struct NewFeatureLayoutTests {
 
     @Test func nookIsWideShortAndTheSameForEveryTab() throws {
         let notch = try #require(ScreenMetrics.sample.notch)
-        let full = HomeContent(hasEvent: true, hasTimer: true, hasShortcuts: true)
+        let full = HomeContent(hasEvent: true, hasTimer: true)
         #expect(full.fitsInNook, "three widget rows fit in the column")
         let sizes = [IslandPresentation.home, .tray, .mirror].map { engine.layout(for: $0, home: full, hovering: false).pill.size }
         #expect(Set(sizes.map { "\($0)" }).count == 1, "switching tabs never resizes the shape")
@@ -255,7 +253,7 @@ struct NewFeatureLayoutTests {
     }
 
     @Test func everyTabFitsTheWindow() {
-        let full = HomeContent(hasEvent: true, hasTimer: true, hasShortcuts: true)
+        let full = HomeContent(hasEvent: true, hasTimer: true)
         let external = ScreenMetrics(size: CGSize(width: 1920, height: 1080), notch: nil, menuBarHeight: 25)
         for screen in [ScreenMetrics.sample, external] {
             let engine = LayoutEngine(screen: screen, appearance: .standard)
@@ -267,13 +265,6 @@ struct NewFeatureLayoutTests {
         }
     }
 
-    @Test func volumeIndicatorIsSlimmerThanOtherAlerts() {
-        let level = engine.layout(for: .alert(.level(.volume, value: 0.5, muted: false)), home: HomeContent(), hovering: false)
-        let charging = engine.layout(for: .alert(.charging(level: 50, isCharging: true)), home: HomeContent(), hovering: false)
-        #expect(level.pill.width < charging.pill.width)
-        #expect(level.pill.height < charging.pill.height)
-    }
-
     @Test func tabsResolve() {
         #expect(PresentationResolver.resolve(PresentationInput(expandTarget: .tray)) == .tray)
         #expect(PresentationResolver.resolve(PresentationInput(expandTarget: .mirror)) == .mirror)
@@ -282,36 +273,6 @@ struct NewFeatureLayoutTests {
         #expect(ExpandTarget(.mirror) == .mirror)
     }
 
-    @Test func levelIsInstantAndNeverReplayed() {
-        let start = Date()
-        var queue = AlertQueue()
-        queue.enqueue(.charging(level: 50, isCharging: true), now: start)
-        queue.promote(now: start, allowNonUrgent: true)
-        let volume = IslandAlert.level(.volume, value: 0.4, muted: false)
-        let shown = queue.enqueue(volume, now: start)
-        #expect(shown)
-        #expect(queue.current == volume)
-        #expect(queue.pending == [.charging(level: 50, isCharging: true)])
-        // Pressing again updates in place.
-        let updated = queue.enqueue(.level(.volume, value: 0.5, muted: false), now: start)
-        #expect(updated)
-        #expect(queue.pending.count == 1)
-        // Timer done takes over and the stale level is dropped.
-        queue.enqueue(.timerFinished, now: start)
-        #expect(queue.current == .timerFinished)
-        #expect(!queue.pending.contains { $0.kind == .level })
-        // Volume while timer done shows is ignored.
-        let ignored = queue.enqueue(volume, now: start)
-        #expect(!ignored)
-        #expect(!queue.pending.contains { $0.kind == .level })
-    }
-
-    @Test func brightnessHeuristic() {
-        #expect(LevelMonitor.isUserBrightnessChange(from: 0.5, to: 0.5625))
-        #expect(!LevelMonitor.isUserBrightnessChange(from: 0.5, to: 0.51))
-        #expect(LevelMonitor.isUserBrightnessChange(from: 0.02, to: 0))
-        #expect(LevelMonitor.isUserBrightnessChange(from: 0.98, to: 1))
-    }
 }
 
 @MainActor
@@ -352,7 +313,6 @@ struct NewFeatureModelTests {
 
     @Test func dropsNeedADestination() {
         let model = makeModel()
-        model.settings.airDropEnabled = false
         model.settings.trayEnabled = false
         model.fileDragChanged(isDragging: true, at: CGPoint(x: model.engine.dropZone.midX, y: 5))
         #expect(model.presentation == .hidden(peek: false))
@@ -371,37 +331,10 @@ struct NewFeatureModelTests {
         let model = makeModel()
         model.settings.calendarEnabled = false
         #expect(!model.homeContent.hasEvent)
-        model.settings.favoriteShortcuts = ["A"]
-        #expect(model.homeContent.hasShortcuts)
-        model.settings.shortcutsEnabled = false
-        #expect(!model.homeContent.hasShortcuts)
         model.settings.timerEnabled = false
         #expect(!model.homeContent.hasTimer)
     }
 
-    @Test func levelsStayOutOfExpandedViews() {
-        let model = makeModel()
-        model.levels.onChange?(.volume, 0.3, false)
-        #expect(model.presentation == .alert(.level(.volume, value: 0.3, muted: false)))
-        model.dismissAlert()
-        model.expand(.home)
-        model.levels.onChange?(.volume, 0.4, false)
-        #expect(model.presentation == .home)
-        model.collapse()
-        model.settings.levelsEnabled = false
-        model.levels.onChange?(.volume, 0.5, false)
-        #expect(model.presentation == .hidden(peek: false))
-    }
-
-    @Test func favouritesAreCapped() {
-        let defaults = UserDefaults(suiteName: "fav.\(UUID().uuidString)")!
-        let store = SettingsStore(defaults: defaults)
-        for name in ["A", "B", "C", "D"] { #expect(store.toggleFavorite(name)) }
-        #expect(!store.toggleFavorite("E"))
-        #expect(store.toggleFavorite("B"))
-        #expect(store.favoriteShortcuts == ["A", "C", "D"])
-        #expect(SettingsStore(defaults: defaults).favoriteShortcuts == ["A", "C", "D"])
-    }
 }
 
 @Suite("Home cards")

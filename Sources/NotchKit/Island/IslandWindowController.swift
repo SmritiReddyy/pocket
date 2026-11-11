@@ -340,9 +340,7 @@ public final class IslandWindowController {
     }
 
     private func dropDestination(at point: CGPoint) -> IslandModel.DropZone? {
-        DropPolicy.destination(at: point, content: model.layout.content,
-            tray: model.settings.trayEnabled,
-            airDrop: model.settings.airDropEnabled && !model.isDocumentWindowDrag)
+        DropPolicy.destination(at: point, content: model.layout.content, tray: model.settings.trayEnabled)
     }
 
     private func updateNativeDrag(_ sender: NSDraggingInfo) -> NSDragOperation {
@@ -355,7 +353,6 @@ public final class IslandWindowController {
         let destination = dropDestination(at: windowPoint())
         model.setTargeted(destination, destination != nil)
         pointerChanged()
-        if destination == .airDrop, !urls.contains(where: \.isFileURL) { return [] }
         return destination == nil ? [] : .copy
     }
 

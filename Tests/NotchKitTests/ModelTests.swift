@@ -20,7 +20,7 @@ struct SettingsStoreTests {
         #expect(!store.showWhenIdle)
         #expect(store.notchOpenMode == .click)
         #expect(store.hoverDelay == 0.4)
-        #expect(store.timerEnabled && store.airDropEnabled)
+        #expect(store.timerEnabled && store.trayEnabled)
         #expect(store.display == .automatic)
     }
 
@@ -173,10 +173,10 @@ struct IslandModelTests {
     @Test func alertsWaitForExpandedViewsExceptTimerDone() {
         let model = makeModel()
         model.expand(.home)
-        model.receive(.charging(level: 50, isCharging: true))
+        model.receive(.upcomingEvent(title: "Event 50", minutes: 5))
         #expect(model.presentation == .home, "non-urgent alert waits")
         model.collapse()
-        #expect(model.presentation == .alert(.charging(level: 50, isCharging: true)))
+        #expect(model.presentation == .alert(.upcomingEvent(title: "Event 50", minutes: 5)))
         model.dismissAlert()
         #expect(model.presentation == .hidden(peek: false))
 
@@ -189,12 +189,9 @@ struct IslandModelTests {
 
     @Test func disabledAlertsAreDropped() {
         let model = makeModel()
-        model.settings.chargingAlertsEnabled = false
-        model.receive(.charging(level: 50, isCharging: true))
-        #expect(model.presentation == .hidden(peek: false))
-        model.settings.headphoneAlertsEnabled = false
-        model.receive(.headphones(name: "AirPods", symbol: "airpods"))
-        #expect(model.presentation == .hidden(peek: false))
+        model.settings.calendarEnabled = false
+        model.receive(.upcomingEvent(title: "Event 50", minutes: 5))
+        #expect(model.presentation == .hidden(peek: false), "no meeting heads-up with Calendar off")
     }
 
     @Test func disabledActivitiesDisappear() {
@@ -315,9 +312,8 @@ struct IslandModelTests {
         #expect(model.pointerMoved(to: CGPoint(x: 1, y: 1)), "window takes the mouse during a drag")
         model.fileDragChanged(isDragging: true, at: CGPoint(x: zone.maxX + 50, y: zone.maxY + 50))
         #expect(model.presentation == .hidden(peek: false))
-        model.settings.airDropEnabled = false
         model.fileDragChanged(isDragging: true, at: CGPoint(x: zone.midX, y: 5))
-        #expect(model.presentation == .drop(targeted: false), "the tray still takes files")
+        #expect(model.presentation == .drop(targeted: false), "the tray takes files")
         model.settings.trayEnabled = false
         model.fileDragChanged(isDragging: true, at: CGPoint(x: zone.midX, y: 5))
         #expect(model.presentation == .hidden(peek: false))

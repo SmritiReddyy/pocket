@@ -12,37 +12,6 @@ struct AlertView: View {
 
     var body: some View {
         switch alert {
-        case .charging(let level, let isCharging):
-            let lowPower = model.power.snapshot?.isLowPowerMode == true
-            let tint = lowPower ? NotchColor.yellow : NotchColor.green
-            AlertRow(cameraGap: cameraGap) {
-                Text(isCharging ? "Charging" : "Connected")
-            } trailing: {
-                BatteryLabel(level: level, isCharging: true, tint: tint)
-            }
-            .accessibilityElement(children: .combine)
-        case .lowBattery(let level):
-            AlertRow(cameraGap: cameraGap) {
-                Text("Low Battery")
-            } trailing: {
-                BatteryLabel(level: level, isCharging: false, tint: NotchColor.red)
-            }
-            .accessibilityElement(children: .combine)
-        case .headphones(let name, let symbol):
-            AlertRow(cameraGap: cameraGap) {
-                HStack(spacing: 6 * s) {
-                    Image(systemName: symbol)
-                        .font(.system(size: 15 * s, weight: .medium))
-                    Text(name)
-                        .font(.system(size: 13 * s, weight: .semibold))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-            } trailing: {
-                Text("Connected")
-                    .foregroundStyle(NotchColor.green)
-            }
-            .accessibilityElement(children: .combine)
         case .timerFinished:
             TimerFinishedView(model: model)
         case .welcome:
@@ -53,19 +22,6 @@ struct AlertView: View {
                 WavingHand()
             }
             .accessibilityElement(children: .combine)
-        case .level(let kind, let value, let muted):
-            AlertRow(cameraGap: cameraGap) {
-                Image(systemName: Self.levelSymbol(kind, value: value, muted: muted))
-                    .font(.system(size: 15 * s, weight: .semibold))
-                    .contentTransition(.symbolEffect(.replace))
-                    .frame(width: 24 * s, alignment: .leading)
-            } trailing: {
-                LevelBar(value: muted ? 0 : value)
-                    .frame(width: 64 * s, height: 6 * s)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(kind == .volume ? "Volume" : "Brightness"))
-            .accessibilityValue(Text(muted ? "Muted" : "\(Int((value * 100).rounded())) percent"))
         case .upcomingEvent(let title, let minutes):
             AlertRow(cameraGap: cameraGap) {
                 HStack(spacing: 6 * s) {
@@ -80,24 +36,6 @@ struct AlertView: View {
                     .foregroundStyle(NotchColor.red)
             }
             .accessibilityElement(children: .combine)
-        case .download(let url):
-            AlertRow(cameraGap: cameraGap) {
-                HStack(spacing: 6 * s) {
-                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
-                        .resizable()
-                        .frame(width: 20 * s, height: 20 * s)
-                    Text(url.lastPathComponent)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-                // Drag the file straight out of the notch.
-                .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
-            } trailing: {
-                Text("Downloaded")
-                    .foregroundStyle(NotchColor.blue)
-            }
-            .help("Click to show in Finder, or drag it out")
-            .accessibilityElement(children: .combine)
         case .updateAvailable(let version):
             AlertRow(cameraGap: cameraGap) {
                 HStack(spacing: 6 * s) {
@@ -111,34 +49,9 @@ struct AlertView: View {
             }
             .help("Click to see what's new and install it")
             .accessibilityElement(children: .combine)
-        case .shortcut(let name, let succeeded):
-            AlertRow(cameraGap: cameraGap) {
-                HStack(spacing: 6 * s) {
-                    Image(systemName: "bolt.fill")
-                        .foregroundStyle(NotchColor.blue)
-                    Text(name)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-            } trailing: {
-                Text(succeeded ? "Done" : "Failed")
-                    .foregroundStyle(succeeded ? NotchColor.green : NotchColor.red)
-            }
-            .accessibilityElement(children: .combine)
         }
     }
 
-    private static func levelSymbol(_ kind: IslandAlert.LevelKind, value: Double, muted: Bool) -> String {
-        switch kind {
-        case .brightness:
-            return value < 0.5 ? "sun.min.fill" : "sun.max.fill"
-        case .volume:
-            if muted || value <= 0.001 { return "speaker.slash.fill" }
-            if value < 0.34 { return "speaker.wave.1.fill" }
-            if value < 0.67 { return "speaker.wave.2.fill" }
-            return "speaker.wave.3.fill"
-        }
-    }
 }
 
 /// Leading content left of the camera, trailing content right of it.
@@ -168,23 +81,6 @@ private struct AlertRow<Leading: View, Trailing: View>: View {
     }
 }
 
-private struct BatteryLabel: View {
-    var level: Int
-    var isCharging: Bool
-    var tint: Color
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        HStack(spacing: 6 * s) {
-            Text("\(level)%")
-                .monospacedDigit()
-                .foregroundStyle(tint)
-            BatteryGlyph(level: level, isCharging: isCharging, color: tint, width: 27 * s)
-        }
-    }
-}
-
-/// A hand that waves from the wrist while the hello shows.
 private struct WavingHand: View {
     @Environment(\.notchScale) private var s
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -260,26 +156,13 @@ struct DropView: View {
     @Environment(\.notchScale) private var s
 
     var body: some View {
-        let tray = model.settings.trayEnabled
-        let airDrop = model.settings.airDropEnabled && !model.isDocumentWindowDrag
-        GeometryReader { geometry in
-            // The same split the drop itself uses, so a file lands where it looks like it will.
-            let gap = 10 * s
-            let edge = 12 * s
-            let trayWidth = tray && airDrop ? geometry.size.width * DropPolicy.trayShare - edge - gap / 2 : nil
-            HStack(spacing: gap) {
-                if tray {
-                    TrayDropZone(model: model, isTargeted: model.targetedZone == .tray)
-                        .frame(width: trayWidth)
-                        .frame(maxWidth: trayWidth == nil ? .infinity : nil)
-                }
-                if airDrop {
-                    AirDropZone(isTargeted: model.targetedZone == .airDrop)
-                        .frame(maxWidth: .infinity)
-                }
+        Group {
+            if model.settings.trayEnabled {
+                TrayDropZone(model: model, isTargeted: model.targetedZone == .tray)
             }
-            .padding(edge)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(12 * s)
         .animation(.spring(duration: 0.3, bounce: 0.35), value: model.targetedZone)
     }
 }
@@ -337,53 +220,5 @@ private struct TrayPeek: View {
             .frame(width: size * 2 + 5 * s)
             .accessibilityHidden(true)
         }
-    }
-}
-
-/// A solid deep-blue box: drop here to send with AirDrop.
-private struct AirDropZone: View {
-    let isTargeted: Bool
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 20 * s, style: .continuous)
-        VStack(alignment: .leading, spacing: 6 * s) {
-            Image(systemName: "dot.radiowaves.up.forward")
-                .font(.system(size: 17 * s, weight: .semibold))
-                .foregroundStyle(NotchColor.blue)
-                .symbolEffect(.variableColor.iterative, isActive: isTargeted)
-            Text(isTargeted ? "Send with AirDrop" : "AirDrop")
-                .font(.system(size: 12 * s, weight: .semibold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .contentTransition(.opacity)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-        .padding(14 * s)
-        .padding(.bottom, 4 * s)
-        .background(shape.fill(Color(red: 0.06, green: 0.22, blue: 0.36).opacity(isTargeted ? 1 : 0.85)))
-        .overlay(shape.strokeBorder(NotchColor.blue.opacity(isTargeted ? 0.9 : 0), lineWidth: 1.5))
-        .scaleEffect(isTargeted ? 1.02 : 1)
-        .contentShape(shape)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("AirDrop"))
-    }
-}
-
-/// Thin level meter for volume and brightness.
-private struct LevelBar: View {
-    var value: Double
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.22))
-                Capsule()
-                    .fill(Color.white)
-                    .frame(width: geometry.size.width * min(max(value, 0), 1))
-            }
-        }
-        .animation(.spring(duration: 0.2, bounce: 0), value: value)
     }
 }

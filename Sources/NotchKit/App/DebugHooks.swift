@@ -28,9 +28,6 @@ final class DebugHooks {
     private func run(_ command: String) {
         let parts = command.split(separator: ":").map(String.init)
         switch parts.first {
-        case "charging": model.receive(.charging(level: 82, isCharging: true))
-        case "lowbattery": model.receive(.lowBattery(level: 20))
-        case "headphones": model.receive(.headphones(name: "AirPods Pro", symbol: "airpodspro"))
         case "timer": model.startTimer(Double(parts.dropFirst().first ?? "") ?? 300)
         case "pause": model.timer.togglePause()
         case "cancel": model.cancelTimer()
@@ -60,17 +57,13 @@ final class DebugHooks {
         case "checkupdate": model.updater.check()
         case "stopwatch": model.stopwatch.start()
         case "awake": model.keepAwake.toggle()
-        case "download": model.receive(.download(URL(fileURLWithPath: parts.dropFirst().first ?? "/tmp/Report.pdf")))
         case "expandnow": if case .compact(let primary, _) = model.presentation { model.expand(.activity(primary)) }
         case "skip": model.swipe(forward: true)
         case "notes": model.showTab(.notes)
         case "focus": if let seconds = parts.dropFirst().first.flatMap(Double.init) { model.timer.start(duration: seconds, mode: .focus) } else { model.startSession(.focus) }
         case "break": model.startSession(.rest)
         case "trayadd": model.addToTray(parts.dropFirst().map { URL(fileURLWithPath: $0) })
-        case "volume": model.receive(.level(.volume, value: Double(parts.dropFirst().first ?? "") ?? 0.6, muted: false))
-        case "brightness": model.receive(.level(.brightness, value: Double(parts.dropFirst().first ?? "") ?? 0.4, muted: false))
         case "event": model.receive(.upcomingEvent(title: "Design review", minutes: 5))
-        case "shortcutdone": model.receive(.shortcut(name: "Morning Routine", succeeded: true))
         case "dump":
             let line = "presentation=\(model.presentation) active=\(model.activeActivities.map(\.rawValue).sorted()) "
                 + "expand=\(String(describing: model.expandTarget)) "

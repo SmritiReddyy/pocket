@@ -127,78 +127,6 @@ struct AllDisplaysTests {
     }
 }
 
-@Suite("Stats maths")
-struct StatsMathTests {
-    @Test func cpuIsTheBusyShareBetweenReadings() {
-        let old = StatsMath.CPUTicks(user: 100, system: 50, idle: 850, nice: 0)
-        let new = StatsMath.CPUTicks(user: 200, system: 100, idle: 1_100, nice: 0)
-        #expect(abs(StatsMath.cpuUsage(from: old, to: new) - 0.375) < 1e-9)
-        #expect(StatsMath.cpuUsage(from: new, to: new) == 0, "no time passed")
-        #expect(StatsMath.cpuUsage(from: new, to: old) == 0, "counters that went backwards read as idle")
-    }
-
-    @Test func networkRatesIgnoreWrappedCounters() {
-        #expect(StatsMath.rate(from: 1_000, to: 3_000, seconds: 2) == 1_000)
-        #expect(StatsMath.rate(from: 4_000_000_000, to: 10, seconds: 2) == 0)
-        #expect(StatsMath.rate(from: 0, to: 10, seconds: 0) == 0)
-    }
-
-    @Test func labelsReadNaturally() {
-        #expect(StatsMath.percent(0.624) == "62%")
-        #expect(StatsMath.percent(1.7) == "100%")
-        #expect(StatsMath.rate(12) == "0 KB/s")
-        #expect(StatsMath.rate(2_500_000).hasSuffix("MB/s"))
-        #expect(StatsMath.level(0.5) == .normal && StatsMath.level(0.8) == .busy && StatsMath.level(0.95) == .high)
-        let snapshot = SystemSnapshot(memoryUsed: 8, memoryTotal: 16, diskFree: 25, diskTotal: 100)
-        #expect(snapshot.memory == 0.5 && snapshot.disk == 0.75)
-    }
-}
-
-@MainActor
-@Suite("Stats in the notch")
-struct StatsModelTests {
-    private func makeModel() -> IslandModel {
-        let defaults = UserDefaults(suiteName: "NotchTests-\(UUID().uuidString)")!
-        let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: nil), notes: NotesStore(defaults: defaults))
-        model.screen = .sample
-        return model
-    }
-
-    @Test func offByDefault() {
-        let model = makeModel()
-        #expect(!model.settings.statsEnabled)
-        #expect(model.presentation == .hidden(peek: false))
-    }
-
-    @Test func showsOnlyWhenNothingElseIsOn() {
-        let model = makeModel()
-        model.settings.statsEnabled = true
-        #expect(model.presentation == .compact(primary: .stats, secondary: nil))
-        model.startTimer(60)
-        #expect(model.presentation == .compact(primary: .timer, secondary: nil), "never shares the notch")
-        model.cancelTimer()
-        #expect(model.presentation == .compact(primary: .stats, secondary: nil))
-    }
-
-    @Test func clickingItOpensTheStatsPanel() {
-        let model = makeModel()
-        model.settings.statsEnabled = true
-        model.tapPill()
-        #expect(model.presentation == .nook(.stats))
-    }
-
-    @Test func theTileIsASwitch() {
-        let model = makeModel()
-        #expect(!model.isLive(.stats))
-        model.open(.stats)
-        #expect(model.settings.statsEnabled && model.isLive(.stats))
-        #expect(model.activeActivities == [.stats])
-        model.open(.stats)
-        #expect(!model.settings.statsEnabled)
-        #expect(model.activeActivities.isEmpty)
-    }
-}
-
 @Suite("Elongated layout")
 struct ElongatedLayoutTests {
     private func engine(_ layout: NookLayout, screen: ScreenMetrics = .sample) -> LayoutEngine {
@@ -219,7 +147,7 @@ struct ElongatedLayoutTests {
     }
 
     @Test func panelsKeepTheirOwnSize() {
-        for presentation in [IslandPresentation.nook(.launcher), .nook(.calendar), .nook(.timers), .nook(.stats), .expanded(.timer)] {
+        for presentation in [IslandPresentation.nook(.launcher), .nook(.calendar), .nook(.timers), .expanded(.timer)] {
             #expect(engine(.elongated).layout(for: presentation, home: HomeContent(), hovering: false).pill
                 == engine(.standard).layout(for: presentation, home: HomeContent(), hovering: false).pill)
         }
@@ -317,12 +245,13 @@ struct RichNotesTests {
 }
 
 @Suite("Drop zones")
-struct DropSplitTests {
-    @Test func trayGetsTheWiderLeftSide() {
+struct DropZoneTests {
+    @Test func theWholeContentIsTheTray() {
         let content = CGRect(x: 100, y: 0, width: 400, height: 100)
-        #expect(DropPolicy.destination(at: CGPoint(x: 100 + 400 * 0.55, y: 50), content: content, tray: true, airDrop: true) == .tray)
-        #expect(DropPolicy.destination(at: CGPoint(x: 100 + 400 * 0.65, y: 50), content: content, tray: true, airDrop: true) == .airDrop)
-        #expect(DropPolicy.destination(at: CGPoint(x: 490, y: 50), content: content, tray: true, airDrop: false) == .tray)
+        #expect(DropPolicy.destination(at: CGPoint(x: 120, y: 50), content: content, tray: true) == .tray)
+        #expect(DropPolicy.destination(at: CGPoint(x: 490, y: 50), content: content, tray: true) == .tray)
+        #expect(DropPolicy.destination(at: CGPoint(x: 490, y: 50), content: content, tray: false) == nil)
+        #expect(DropPolicy.destination(at: CGPoint(x: 50, y: 50), content: content, tray: true) == nil)
     }
 }
 
@@ -330,68 +259,13 @@ struct DropSplitTests {
 struct GridPageTests {
     @Test func fiveToARowTenToAPage() {
         #expect(LauncherBody.columns == 5)
-        #expect(LauncherBody.pages(LauncherItem.allCases).count == 1, "all ten tiles fit one page")
-        let pages = LauncherBody.pages(LauncherItem.allCases + [.timer])
+        #expect(LauncherBody.pages(LauncherItem.allCases).count == 1, "every tile fits one page")
+        let eleven = LauncherItem.allCases + [.timer, .stopwatch]
+        let pages = LauncherBody.pages(Array(eleven.prefix(11)))
         #expect(pages.count == 2)
-        #expect(pages[0].count == 10 && pages[1] == [.timer])
+        #expect(pages[0].count == 10 && pages[1].count == 1)
         #expect(LauncherBody.pages(Array(LauncherItem.allCases.prefix(4))).count == 1)
         #expect(LauncherBody.pages([]).count == 1, "an empty grid still has its page")
-    }
-}
-
-@Suite("Stats readings")
-struct StatsReadingTests {
-    @Test func memoryColourFollowsPressureNotPercent() {
-        #expect(StatsMath.pressure(1) == .normal)
-        #expect(StatsMath.pressure(2) == .busy)
-        #expect(StatsMath.pressure(4) == .high)
-    }
-
-    @Test func onlyRealLinksCountTowardsNetworkSpeed() {
-        #expect(StatsMath.countsTraffic(interface: "en0"))
-        #expect(StatsMath.countsTraffic(interface: "en7"))
-        for tunnel in ["utun3", "bridge100", "lo0", "awdl0", "llw0", "anpi0"] {
-            #expect(!StatsMath.countsTraffic(interface: tunnel), "\(tunnel)")
-        }
-    }
-}
-
-@MainActor
-@Suite("Stats sampling")
-struct StatsSamplingTests {
-    @Test func readsOnlyWhileItShows() async throws {
-        let defaults = UserDefaults(suiteName: "NotchTests-\(UUID().uuidString)")!
-        let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: nil), notes: NotesStore(defaults: defaults))
-        model.screen = .sample
-        // Changes are picked up on the next turn of the main loop, as in the app.
-        func settle(until done: () -> Bool) async throws {
-            for _ in 0..<50 where !done() { try await Task.sleep(for: .milliseconds(10)) }
-        }
-        model.open(.stats)
-        #expect(model.stats.isRunning)
-        model.startTimer(60)
-        try await settle { !model.stats.isRunning }
-        #expect(!model.stats.isRunning, "a timer pushed it aside")
-        model.cancelTimer()
-        try await settle { model.stats.isRunning }
-        #expect(model.stats.isRunning)
-        model.open(.stats)
-        #expect(!model.stats.isRunning)
-    }
-
-    @Test func hoveringStatsOpensHome() async throws {
-        let defaults = UserDefaults(suiteName: "NotchTests-\(UUID().uuidString)")!
-        let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: nil), notes: NotesStore(defaults: defaults))
-        model.screen = .sample
-        model.settings.statsEnabled = true
-        model.settings.notchOpenMode = .hover
-        model.settings.hoverDelay = 0.1
-        let pill = model.layout.pill
-        _ = model.pointerMoved(to: CGPoint(x: pill.midX, y: pill.midY))
-        for _ in 0..<60 where model.presentation != .home {
-            try await Task.sleep(for: .milliseconds(20))
-        }
-        #expect(model.presentation == .home)
     }
 }
 

@@ -19,7 +19,7 @@ struct NotchLayoutTests {
         let presentations: [IslandPresentation] = [
             .hidden(peek: false), .hidden(peek: true), .idle,
             .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer), .home,
-            .alert(.charging(level: 50, isCharging: true)), .alert(.timerFinished), .drop(targeted: true),
+            .alert(.upcomingEvent(title: "Event 50", minutes: 5)), .alert(.timerFinished), .drop(targeted: true),
         ]
         for presentation in presentations {
             let result = layout(presentation)
@@ -29,7 +29,7 @@ struct NotchLayoutTests {
 
     @Test func centredOnTheNotch() throws {
         let notch = engine.notchInWindow
-        for presentation in [IslandPresentation.compact(primary: .timer, secondary: nil), .home, .alert(.lowBattery(level: 10))] {
+        for presentation in [IslandPresentation.compact(primary: .timer, secondary: nil), .home, .alert(.upcomingEvent(title: "Event 10", minutes: 5))] {
             #expect(abs(layout(presentation).pill.midX - notch.midX) < 0.001)
         }
     }
@@ -113,7 +113,7 @@ struct NotchLayoutTests {
     }
 
     @Test func pitchBlackRemovesShadowAndOutline() {
-        for presentation in [IslandPresentation.compact(primary: .timer, secondary: nil), .home, .alert(.lowBattery(level: 20))] {
+        for presentation in [IslandPresentation.compact(primary: .timer, secondary: nil), .home, .alert(.upcomingEvent(title: "Event 20", minutes: 5))] {
             let result = layout(presentation)
             #expect(result.shadow == 0)
             #expect(result.stroke == 0)
@@ -131,7 +131,7 @@ struct NotchLayoutTests {
         let engine = LayoutEngine(screen: screen, appearance: extreme)
         let bounds = CGRect(origin: .zero, size: engine.windowSize)
         let presentations: [IslandPresentation] = [
-            .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer), .home, .alert(.headphones(name: "A", symbol: "airpods")),
+            .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer), .home, .alert(.welcome),
             .alert(.timerFinished), .drop(targeted: false),
         ]
         for presentation in presentations {
@@ -182,7 +182,7 @@ struct VirtualNotchLayoutTests {
     @Test func everyShapeIsANotchFusedToTheTop() {
         let presentations: [IslandPresentation] = [
             .hidden(peek: true), .idle, .compact(primary: .timer, secondary: .stopwatch), .expanded(.timer),
-            .home, .alert(.charging(level: 50, isCharging: true)), .drop(targeted: true),
+            .home, .alert(.upcomingEvent(title: "Event 50", minutes: 5)), .drop(targeted: true),
         ]
         for presentation in presentations {
             let result = layout(presentation)

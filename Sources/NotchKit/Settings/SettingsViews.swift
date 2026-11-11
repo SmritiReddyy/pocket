@@ -257,14 +257,6 @@ struct ActivitiesSettingsView: View {
         Form {
             Section("Live Activities") {
                 IconToggle(title: "Timer", detail: "Start one from the pill or the menu bar", symbol: "timer", color: .orange, isOn: $settings.timerEnabled)
-                IconToggle(title: "AirDrop", detail: "Drag files to the notch to send them", symbol: "dot.radiowaves.up.forward", color: .blue, isOn: $settings.airDropEnabled)
-            }
-
-            Section("Alerts") {
-                IconToggle(title: "Charging", detail: nil, symbol: "bolt.fill", color: .green, isOn: $settings.chargingAlertsEnabled)
-                IconToggle(title: "Low Battery", detail: "At 20% and 10%", symbol: "battery.25percent", color: .red, isOn: $settings.lowBatteryAlertsEnabled)
-                IconToggle(title: "Headphones", detail: "When AirPods or other Bluetooth headphones connect", symbol: "airpodspro", color: .gray, isOn: $settings.headphoneAlertsEnabled)
-                IconToggle(title: "Volume & Brightness", detail: "Shows the level in the notch when you change it", symbol: "speaker.wave.2.fill", color: .indigo, isOn: $settings.levelsEnabled)
             }
         }
         .formStyle(.grouped)
@@ -276,7 +268,6 @@ struct ActivitiesSettingsView: View {
 struct HomeSettingsView: View {
     @Bindable var settings: SettingsStore
     let calendar: CalendarService
-    let shortcuts: ShortcutsService
 
     var body: some View {
         Form {
@@ -291,9 +282,7 @@ struct HomeSettingsView: View {
                 IconToggle(title: "Clipboard", detail: "Text you copied recently. Passwords are skipped, nothing is saved", symbol: "doc.on.clipboard.fill", color: .orange, isOn: $settings.clipboardEnabled)
                 IconToggle(title: "Notes", detail: "A quick scratchpad, saved as you type", symbol: "note.text", color: .yellow, isOn: $settings.notesEnabled)
                 IconToggle(title: "Reminders", detail: "Today's to-dos, ticked off from the notch", symbol: "checklist", color: .blue, isOn: $settings.remindersEnabled)
-                IconToggle(title: "Finished downloads", detail: "A heads-up when a file lands in Downloads. macOS asks for access once", symbol: "arrow.down.circle.fill", color: .blue, isOn: $settings.downloadsEnabled)
-                IconToggle(title: "Mirror", detail: "A quick camera preview before calls", symbol: "person.crop.square.fill", color: .purple, isOn: $settings.mirrorEnabled)
-                IconToggle(title: "Stats", detail: "Memory and CPU beside the camera when nothing else is on, plus disk and network in the grid", symbol: "gauge.with.dots.needle.33percent", color: .green, isOn: $settings.statsEnabled)
+                IconToggle(title: "Mirror", detail: "A quick camera preview", symbol: "person.crop.square.fill", color: .purple, isOn: $settings.mirrorEnabled)
             } header: {
                 Text("Tabs")
             } footer: {
@@ -320,40 +309,8 @@ struct HomeSettingsView: View {
                 Text("Calendar")
             }
 
-            Section {
-                IconToggle(title: "Shortcuts", detail: "Run your favourite shortcuts from Home", symbol: "bolt.fill", color: .blue, isOn: $settings.shortcutsEnabled)
-                if settings.shortcutsEnabled {
-                    if !shortcuts.isSupported {
-                        Text("The Shortcuts app isn't available on this Mac.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else if shortcuts.isLoading && shortcuts.available.isEmpty {
-                        ProgressView().controlSize(.small)
-                    } else if shortcuts.available.isEmpty {
-                        Text("You don't have any shortcuts yet. Make some in the Shortcuts app.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(shortcuts.available, id: \.self) { name in
-                            let isFavorite = settings.favoriteShortcuts.contains(name)
-                            Toggle(name, isOn: Binding(
-                                get: { isFavorite },
-                                set: { _ in settings.toggleFavorite(name) }
-                            ))
-                            .disabled(!isFavorite && settings.favoriteShortcuts.count >= SettingsStore.maximumFavoriteShortcuts)
-                        }
-                    }
-                }
-            } header: {
-                Text("Shortcuts")
-            } footer: {
-                Text("Pick up to \(SettingsStore.maximumFavoriteShortcuts) to show in Home.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
         .formStyle(.grouped)
-        .onAppear { shortcuts.reload() }
     }
 }
 

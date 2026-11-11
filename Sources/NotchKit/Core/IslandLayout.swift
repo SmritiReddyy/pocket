@@ -180,14 +180,12 @@ public struct LayoutEngine: Equatable, Sendable {
         notch.width + 2 * earWidth
     }
 
-    /// Volume and brightness use a slimmer shape than other alerts.
+    /// Meeting heads-ups get extra room for the event's name.
     private func alertBodySize(for alert: IslandAlert) -> CGSize {
         switch alert {
-        case .upcomingEvent, .shortcut, .download:
+        case .upcomingEvent:
             // Names need room beside the camera.
             CGSize(width: notch.width + 2 * max(earWidth, (IslandMetrics.namedAlertEarWidth * scale).rounded()), height: compactHeight + (6 * scale).rounded())
-        case .level:
-            CGSize(width: notch.width + 2 * max(earWidth, (IslandMetrics.levelEarWidth * scale).rounded()), height: compactHeight)
         default:
             alertBodySize
         }

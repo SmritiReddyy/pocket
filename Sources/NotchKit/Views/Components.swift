@@ -74,41 +74,6 @@ struct ChipButtonStyle: ButtonStyle {
     }
 }
 
-/// iOS-style battery: outlined body, fill by level, cap, and a bolt while charging.
-struct BatteryGlyph: View {
-    var level: Int
-    var isCharging: Bool
-    var color: Color
-    var width: CGFloat = 27
-
-    var body: some View {
-        let height = width * 0.48
-        let inset = width * 0.075
-        HStack(spacing: width * 0.04) {
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: height * 0.3, style: .continuous)
-                    .strokeBorder(color.opacity(0.45), lineWidth: 1)
-                RoundedRectangle(cornerRadius: height * 0.18, style: .continuous)
-                    .fill(color)
-                    .frame(width: max(2, (width - inset * 2) * CGFloat(min(max(level, 0), 100)) / 100))
-                    .padding(inset)
-                if isCharging {
-                    Image(systemName: "bolt.fill")
-                        .font(.system(size: height * 0.72, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.5), radius: 0.5)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .frame(width: width, height: height)
-            Capsule()
-                .fill(color.opacity(0.45))
-                .frame(width: width * 0.06, height: height * 0.36)
-        }
-        .accessibilityHidden(true)
-    }
-}
-
 /// A countdown that ticks on its own, like Live Activities.
 struct CountdownText: View {
     var timer: CountdownTimer

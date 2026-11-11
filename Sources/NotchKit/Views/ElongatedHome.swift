@@ -2,9 +2,8 @@ import SwiftUI
 
 // The elongated layout: Home becomes one long, short row of widgets across the top of the
 // screen, split by hairlines, that you scroll sideways through. In order: the camera mirror,
-// this week's calendar, a formatted note, a wheel timer, a to-do list and, when it's
-// on, Stats. Blue is the accent throughout, and each widget works
-// right where it is: join a call, type, tick off, start a timer.
+// this week's calendar, a formatted note, a wheel timer and a to-do list. Blue is the accent
+// throughout, and each widget works right where it is: join a call, type, tick off, start a timer.
 
 /// Home in the elongated layout.
 struct ElongatedHomeBody: View {
@@ -41,7 +40,7 @@ struct ElongatedHomeBody: View {
     }
 
     enum Widget: Hashable {
-        case mirror, calendar, notes, timer, todos, stats
+        case mirror, calendar, notes, timer, todos
 
         /// Width before Small / Medium / Large scaling.
         var width: CGFloat {
@@ -51,7 +50,6 @@ struct ElongatedHomeBody: View {
             case .notes: 230
             case .timer: 250
             case .todos: 230
-            case .stats: 210
             }
         }
     }
@@ -64,7 +62,6 @@ struct ElongatedHomeBody: View {
         if model.settings.notesEnabled { widgets.append(.notes) }
         if model.settings.timerEnabled { widgets.append(.timer) }
         widgets.append(.todos)
-        if model.settings.statsEnabled { widgets.append(.stats) }
         return widgets
     }
 
@@ -76,7 +73,6 @@ struct ElongatedHomeBody: View {
         case .notes: NotesWidget(model: model)
         case .timer: TimerWidget(model: model)
         case .todos: TodosWidget(model: model)
-        case .stats: StatsWidget(model: model)
         }
     }
 }

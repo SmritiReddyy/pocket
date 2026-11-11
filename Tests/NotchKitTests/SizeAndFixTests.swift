@@ -26,7 +26,7 @@ struct SizeModeTests {
     @Test func smallerSizesShrinkEverything() {
         let presentations: [IslandPresentation] = [
             .compact(primary: .timer, secondary: .stopwatch), .expanded(.stopwatch), .expanded(.timer), .home,
-            .alert(.charging(level: 50, isCharging: true)), .alert(.timerFinished), .drop(targeted: false),
+            .alert(.upcomingEvent(title: "Event 50", minutes: 5)), .alert(.timerFinished), .drop(targeted: false),
         ]
         let external = ScreenMetrics(size: CGSize(width: 1920, height: 1080), notch: nil, menuBarHeight: 25)
         for screen in [ScreenMetrics.sample, external] {
@@ -115,12 +115,12 @@ struct ModelFixTests {
 
     @Test func timerDoneInterruptsAnotherAlert() {
         let model = makeModel()
-        model.receive(.charging(level: 40, isCharging: true))
-        #expect(model.presentation == .alert(.charging(level: 40, isCharging: true)))
+        model.receive(.upcomingEvent(title: "Event 40", minutes: 5))
+        #expect(model.presentation == .alert(.upcomingEvent(title: "Event 40", minutes: 5)))
         model.receive(.timerFinished)
         #expect(model.presentation == .alert(.timerFinished))
         model.stopTimerAlarm()
-        #expect(model.presentation == .alert(.charging(level: 40, isCharging: true)), "the interrupted alert comes back")
+        #expect(model.presentation == .alert(.upcomingEvent(title: "Event 40", minutes: 5)), "the interrupted alert comes back")
     }
 
     @Test func welcomeIsShownOnce() {

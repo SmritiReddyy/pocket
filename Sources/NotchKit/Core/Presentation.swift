@@ -4,67 +4,39 @@ import Foundation
 public enum ActivityKind: String, CaseIterable, Sendable, Codable, Hashable {
     case timer
     case stopwatch
-    /// Memory and CPU, when Stats is on and nothing else is happening. Never shares the notch:
-    /// any other activity replaces it.
-    case stats
 
     /// Lower comes first.
     public var priority: Int {
         switch self {
         case .timer: 0
         case .stopwatch: 1
-        case .stats: 2
         }
     }
 }
 
 /// A short system event, shown briefly like the iPhone's charging or AirPods alerts.
 public enum IslandAlert: Equatable, Sendable {
-    case charging(level: Int, isCharging: Bool)
-    case lowBattery(level: Int)
-    case headphones(name: String, symbol: String)
     case timerFinished
     /// Shown once on first launch, so a new user sees where the app lives.
     case welcome
-    /// Volume or brightness changed. `value` is 0…1.
-    case level(LevelKind, value: Double, muted: Bool)
     /// A calendar event is about to start.
     case upcomingEvent(title: String, minutes: Int)
-    /// A shortcut run from the notch finished.
-    case shortcut(name: String, succeeded: Bool)
-    /// A file finished downloading into Downloads.
-    case download(URL)
     /// A new version of the app is out.
     case updateAvailable(version: String)
 
-    public enum LevelKind: String, Sendable, Hashable {
-        case volume
-        case brightness
-    }
-
     /// Alerts of the same kind replace each other instead of queueing.
     public enum Kind: Hashable, Sendable {
-        case power
-        case headphones
         case timer
         case app
-        case level
         case calendar
-        case shortcut
-        case download
         case update
     }
 
     public var kind: Kind {
         switch self {
-        case .charging, .lowBattery: .power
-        case .headphones: .headphones
         case .timerFinished: .timer
         case .welcome: .app
-        case .level: .level
         case .upcomingEvent: .calendar
-        case .shortcut: .shortcut
-        case .download: .download
         case .updateAvailable: .update
         }
     }
@@ -73,15 +45,9 @@ public enum IslandAlert: Equatable, Sendable {
     /// ten minutes so an unattended Mac isn't left with the notch expanded.
     public var displayDuration: TimeInterval {
         switch self {
-        case .charging: 3
-        case .lowBattery: 4
-        case .headphones: 3
         case .timerFinished: 600
         case .welcome: 4
-        case .level: 1.6
         case .upcomingEvent: 8
-        case .shortcut: 2.5
-        case .download: 5
         case .updateAvailable: 6
         }
     }
@@ -89,13 +55,6 @@ public enum IslandAlert: Equatable, Sendable {
     /// Urgent alerts interrupt an expanded view; the rest wait for it to close.
     public var isUrgent: Bool {
         self == .timerFinished
-    }
-
-    /// Feedback for something the user just did (volume keys): shown at once, never queued
-    /// behind other alerts, and dropped rather than replayed if something urgent takes over.
-    public var isInstant: Bool {
-        if case .level = self { return true }
-        return false
     }
 }
 
@@ -110,8 +69,6 @@ public enum HomeTab: String, CaseIterable, Sendable, Codable, Hashable {
     case timers
     case calendar
     case reminders
-    /// Memory, CPU, disk and network.
-    case stats
     /// The grid of everything the notch can do.
     case launcher
 

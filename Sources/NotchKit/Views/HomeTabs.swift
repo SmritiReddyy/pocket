@@ -56,7 +56,6 @@ struct NookContainer<Content: View>: View {
         case .reminders: "Reminders"
         case .notes: "Scratchpad"
         case .mirror: "Camera Mirror"
-        case .stats: "Stats"
         default: "Timer"
         }
     }
@@ -201,7 +200,6 @@ private struct NookTabButton: View {
         case .timers: "Timer"
         case .calendar: "Calendar"
         case .reminders: "Reminders"
-        case .stats: "Stats"
         case .launcher: "All Features"
         }
     }
@@ -216,7 +214,6 @@ private struct NookTabButton: View {
         case .timers: "timer"
         case .calendar: "calendar"
         case .reminders: "checklist"
-        case .stats: "gauge.with.dots.needle.33percent"
         case .launcher: "square.grid.2x2"
         }
     }
@@ -245,7 +242,7 @@ private struct SettingsButton: View {
 
 // MARK: Home
 
-/// Calendar, timers and shortcuts, with the scratchpad, reminders and clipboard cards beside them.
+/// Calendar and timers, with the scratchpad, reminders and clipboard cards beside them.
 struct HomeBody: View {
     let model: IslandModel
     @Environment(\.notchScale) private var s
@@ -268,10 +265,6 @@ struct HomeBody: View {
                 }
                 if content.hasTimer {
                     TimerPresetsRow(model: model, presetCount: content.cards.isEmpty ? 3 : 2)
-                        .frame(height: IslandMetrics.Nook.row * s)
-                }
-                if content.hasShortcuts {
-                    ShortcutsRow(model: model)
                         .frame(height: IslandMetrics.Nook.row * s)
                 }
                 if content.rowCount == 0 && content.cards.isEmpty {
@@ -462,37 +455,6 @@ private struct TimerPresetsRow: View {
     }
 }
 
-private struct ShortcutsRow: View {
-    let model: IslandModel
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        HStack(spacing: 6 * s) {
-            RowLabel(symbol: "bolt.fill", tint: NotchColor.blue, title: "Shortcuts")
-            Spacer(minLength: 8 * s)
-            ForEach(model.favoriteShortcuts, id: \.self) { name in
-                let isRunning = model.shortcuts.running.contains(name)
-                Button {
-                    model.shortcuts.run(name)
-                } label: {
-                    HStack(spacing: 5 * s) {
-                        if isRunning {
-                            ProgressView()
-                                .controlSize(.mini)
-                        }
-                        Text(name)
-                            .truncationMode(.tail)
-                            .frame(maxWidth: 110 * s)
-                    }
-                }
-                .buttonStyle(QuickActionStyle(tint: NotchColor.blue, scale: s))
-                .disabled(isRunning)
-                .accessibilityLabel(Text("Run shortcut \(name)"))
-            }
-        }
-    }
-}
-
 // MARK: Tray
 
 /// Files dropped on the notch. Drag them out, double-click to open, right-click for more.
@@ -600,7 +562,6 @@ struct TrayItemView: View {
         .contextMenu {
             Button("Open") { model.tray.open(item) }
             Button("Show in Finder") { model.tray.revealInFinder(item) }
-            Button("Send with AirDrop") { model.airDrop([item.url]) }
             Divider()
             Button("Remove from Tray") { model.tray.remove(item.id) }
         }

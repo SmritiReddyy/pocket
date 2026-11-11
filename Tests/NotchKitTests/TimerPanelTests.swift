@@ -49,16 +49,6 @@ struct CalendarPanelTests {
     }
 }
 
-@Suite("Downloads")
-struct DownloadRulesTests {
-    @Test func skipsPartialAndHiddenFiles() {
-        #expect(DownloadRules.isFinishedName("Report.pdf"))
-        #expect(!DownloadRules.isFinishedName("Report.pdf.crdownload"))
-        #expect(!DownloadRules.isFinishedName("Movie.mp4.download"))
-        #expect(!DownloadRules.isFinishedName(".DS_Store"))
-    }
-}
-
 @MainActor
 @Suite("Timer panel and gestures")
 struct TimerPanelModelTests {

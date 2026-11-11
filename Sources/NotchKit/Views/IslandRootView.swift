@@ -166,9 +166,6 @@ struct NotchContent: View {
             TimerExpandedView(model: model)
         case .expanded(.stopwatch):
             StopwatchExpandedView(model: model)
-        case .expanded(.stats):
-            // Stats opens in the nook; this only covers the moment before that switch.
-            StatsPanelBody(model: model)
         case .nook(let tab):
             NookContainer(model: model, tab: tab, cameraGap: cameraGap, stripHeight: stripHeight) {
                 switch tab {
@@ -180,7 +177,6 @@ struct NotchContent: View {
                 case .timers: TimerPanelBody(model: model)
                 case .calendar: CalendarPanelBody(model: model)
                 case .reminders: RemindersPanelBody(model: model)
-                case .stats: StatsPanelBody(model: model)
                 case .launcher: LauncherBody(model: model)
                 }
             }
@@ -236,7 +232,6 @@ private struct ActivityHeader: View {
         return switch kind {
         case .timer: (model.timer.timer?.mode ?? .plain).title
         case .stopwatch: "Stopwatch"
-        case .stats: "Stats"
         }
     }
 }

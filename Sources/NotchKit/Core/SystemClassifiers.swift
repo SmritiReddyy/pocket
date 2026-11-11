@@ -1,17 +1,5 @@
 import Foundation
 
-public enum HeadphoneSymbol {
-    /// The SF Symbol that best matches a Bluetooth audio device name.
-    public static func symbol(forDeviceName name: String) -> String {
-        let lowered = name.lowercased()
-        if lowered.contains("airpods max") { return "airpodsmax" }
-        if lowered.contains("airpods pro") { return "airpodspro" }
-        if lowered.contains("airpods") { return "airpods" }
-        if lowered.contains("beats") { return "beats.headphones" }
-        return "headphones"
-    }
-}
-
 /// Numbers for the liquid effect.
 public enum GooMath {
     /// Blur radius at full strength. Small enough that a 24 pt pill never blurs away.

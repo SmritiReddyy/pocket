@@ -40,8 +40,6 @@ struct CompactView: View {
                 .font(.system(size: scale.fontSize + 1, weight: .semibold))
                 .foregroundStyle(NotchColor.orange)
                 .accessibilityLabel(Text("Stopwatch"))
-        case .stats:
-            StatsCompactValue(caption: "MEM", share: model.stats.snapshot.memoryTotal > 0 ? model.stats.snapshot.memory : nil, level: model.stats.snapshot.memoryPressure, fontSize: scale.fontSize)
         }
     }
 
@@ -67,8 +65,6 @@ struct CompactView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
             }
-        case .stats:
-            StatsCompactValue(caption: "CPU", share: model.stats.hasReading ? model.stats.snapshot.cpu : nil, fontSize: scale.fontSize, alignment: .trailing)
         }
     }
 }
@@ -89,10 +85,6 @@ struct MinimalView: View {
                 Image(systemName: "stopwatch.fill")
                     .font(.system(size: diameter * 0.4, weight: .semibold))
                     .foregroundStyle(NotchColor.orange)
-            case .stats:
-                Image(systemName: "gauge.with.dots.needle.33percent")
-                    .font(.system(size: diameter * 0.4, weight: .semibold))
-                    .foregroundStyle(NotchColor.green)
             }
         }
         .frame(width: diameter, height: diameter)

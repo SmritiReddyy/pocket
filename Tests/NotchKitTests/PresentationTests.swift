@@ -18,9 +18,7 @@ struct PresentationTests {
         #expect(PresentationResolver.resolve(PresentationInput(isPreviewing: true)) == .idle)
     }
 
-    @Test func priorityIsTimerThenStopwatchThenStats() {
-        let input = PresentationInput(activeActivities: [.stats, .stopwatch, .timer])
-        #expect(PresentationResolver.resolve(input) == .compact(primary: .timer, secondary: .stopwatch))
+    @Test func priorityIsTimerThenStopwatch() {
         let two = PresentationInput(activeActivities: [.stopwatch, .timer])
         #expect(PresentationResolver.resolve(two) == .compact(primary: .timer, secondary: .stopwatch))
     }
@@ -33,15 +31,15 @@ struct PresentationTests {
     }
 
     @Test func swipingVisitsEveryActivity() {
-        let all: Set<ActivityKind> = [.timer, .stopwatch, .stats]
+        let all: Set<ActivityKind> = [.timer, .stopwatch]
         var current: ActivityKind? = .timer
         var seen: [ActivityKind] = []
-        for _ in 0..<3 {
+        for _ in 0..<2 {
             current = PresentationResolver.nextPrimary(all, current: current, forward: true)
             seen.append(current!)
         }
-        #expect(seen == [.stopwatch, .stats, .timer])
-        #expect(PresentationResolver.nextPrimary(all, current: .timer, forward: false) == .stats)
+        #expect(seen == [.stopwatch, .timer])
+        #expect(PresentationResolver.nextPrimary(all, current: .timer, forward: false) == .stopwatch)
         #expect(PresentationResolver.nextPrimary([.timer], current: .timer, forward: true) == nil)
         #expect(PresentationResolver.nextPrimary([.timer, .stopwatch], current: nil, forward: true) == .stopwatch)
     }
@@ -55,8 +53,8 @@ struct PresentationTests {
     }
 
     @Test func alertsBeatExpandedAndDragBeatsAlerts() {
-        let alert = PresentationInput(activeActivities: [.timer], alert: .lowBattery(level: 10), expandTarget: .home)
-        #expect(PresentationResolver.resolve(alert) == .alert(.lowBattery(level: 10)))
+        let alert = PresentationInput(activeActivities: [.timer], alert: .upcomingEvent(title: "Event 10", minutes: 5), expandTarget: .home)
+        #expect(PresentationResolver.resolve(alert) == .alert(.upcomingEvent(title: "Event 10", minutes: 5)))
         var drag = alert
         drag.isFileDragNear = true
         #expect(PresentationResolver.resolve(drag) == .drop(targeted: false))

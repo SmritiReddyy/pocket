@@ -8,19 +8,13 @@ import os
 public final class IslandModel {
     public let settings: SettingsStore
     public let timer: TimerService
-    public let power: PowerMonitor
-    public let audioRoute: AudioRouteMonitor
     public let tray: TrayStore
     public let calendar: CalendarService
-    public let shortcuts: ShortcutsService
-    public let levels: LevelMonitor
     public let clipboard: ClipboardMonitor
     public let notes: NotesStore
     public let stopwatch: StopwatchService
     public let keepAwake = KeepAwakeService()
-    public let downloads: DownloadsWatcher
     public let reminders = RemindersService()
-    public let stats = StatsService()
     public let todos: TodoStore
     /// A text field in the open nook has the keyboard (Notes or a new to-do in the elongated
     /// layout). The notch stays open while you type, even if the pointer wanders off.
@@ -75,30 +69,20 @@ public final class IslandModel {
     public init(
         settings: SettingsStore,
         timer: TimerService = TimerService(),
-        power: PowerMonitor = PowerMonitor(),
-        audioRoute: AudioRouteMonitor = AudioRouteMonitor(),
         tray: TrayStore = TrayStore(),
         calendar: CalendarService = CalendarService(),
-        shortcuts: ShortcutsService = ShortcutsService(),
-        levels: LevelMonitor = LevelMonitor(),
         clipboard: ClipboardMonitor = ClipboardMonitor(),
         notes: NotesStore = NotesStore(),
         stopwatch: StopwatchService = StopwatchService(),
-        downloads: DownloadsWatcher = DownloadsWatcher(),
         todos: TodoStore = TodoStore()
     ) {
         self.settings = settings
         self.timer = timer
-        self.power = power
-        self.audioRoute = audioRoute
         self.tray = tray
         self.calendar = calendar
-        self.shortcuts = shortcuts
-        self.levels = levels
         self.clipboard = clipboard
         self.notes = notes
         self.stopwatch = stopwatch
-        self.downloads = downloads
         self.todos = todos
         focusPanelMinutes = settings.focusMinutes
 
@@ -107,38 +91,21 @@ public final class IslandModel {
             let minutes = max(0, Int((event.start.timeIntervalSinceNow / 60).rounded()))
             self.receive(.upcomingEvent(title: event.title, minutes: minutes))
         }
-        shortcuts.onFinish = { [weak self] name, succeeded in
-            self?.receive(.shortcut(name: name, succeeded: succeeded))
-        }
-        levels.onChange = { [weak self] kind, value, muted in
-            guard let self, self.settings.levelsEnabled else { return }
-            // While an expanded view is open, it stays put; the system indicator still shows.
-            guard self.expandTarget == nil else { return }
-            self.receive(.level(kind, value: value, muted: muted))
-        }
 
         timer.onFinish = { [weak self] in self?.timerDidFinish() }
-        downloads.onFinished = { [weak self] url in self?.receive(.download(url)) }
         hotKeys.onPress = { [weak self] item in self?.open(item) }
         // The permission dialog closes the notch; reopen it on the calendar so the user sees it worked.
         calendar.onGranted = { [weak self] in self?.showTab(.calendar) }
         reminders.onGranted = { [weak self] in self?.showTab(.reminders) }
         updater.onAvailable = { [weak self] release in self?.receive(.updateAvailable(version: release.version.description)) }
-        power.onAlert = { [weak self] alert in self?.receive(alert) }
-        audioRoute.onAlert = { [weak self] alert in self?.receive(alert) }
         observeActivities()
         observeSettings()
     }
 
     public func startServices() {
-        power.start()
-        audioRoute.start()
         calendar.start()
-        levels.start()
         if settings.clipboardEnabled { clipboard.start() }
-        if settings.downloadsEnabled { downloads.start() }
         if settings.remindersEnabled { reminders.start() }
-        syncStatsSampling()
         if settings.keyboardShortcutsEnabled { hotKeys.register() }
         // This build doesn't update itself: upstream releases include Now Playing.
         if !settings.hasShownWelcome {
@@ -151,14 +118,9 @@ public final class IslandModel {
     }
 
     public func stopServices() {
-        power.stop()
-        audioRoute.stop()
         calendar.stop()
-        levels.stop()
         clipboard.stop()
-        downloads.stop()
         reminders.stop()
-        stats.stop()
         hotKeys.unregister()
         updater.stopAutomaticChecks()
         keepAwake.turnOff()
@@ -220,8 +182,6 @@ public final class IslandModel {
         var active = Set<ActivityKind>()
         if settings.timerEnabled, timer.isActive { active.insert(.timer) }
         if settings.timerEnabled, stopwatch.isActive { active.insert(.stopwatch) }
-        // Stats fills the notch only when nothing else is happening.
-        if settings.statsEnabled, active.isEmpty { active.insert(.stats) }
         return active
     }
 
@@ -239,9 +199,9 @@ public final class IslandModel {
         ))
     }
 
-    /// Files can be dropped on the notch when at least one destination is on.
+    /// Files can be dropped on the notch while Tray is on.
     public var acceptsFileDrops: Bool {
-        settings.airDropEnabled || settings.trayEnabled
+        settings.trayEnabled
     }
 
     /// The calendar row shows the next event, or a button to connect the calendar.
@@ -250,16 +210,10 @@ public final class IslandModel {
         settings.calendarEnabled
     }
 
-    public var favoriteShortcuts: [String] {
-        guard settings.shortcutsEnabled else { return [] }
-        return settings.favoriteShortcuts
-    }
-
     public var homeContent: HomeContent {
         HomeContent(
             hasEvent: showsCalendarRow,
             hasTimer: settings.timerEnabled,
-            hasShortcuts: !favoriteShortcuts.isEmpty,
             cards: homeCards
         )
     }
@@ -294,7 +248,7 @@ public final class IslandModel {
             case .files: settings.trayEnabled
             case .scratchpad: settings.notesEnabled
             case .mirror: settings.mirrorEnabled
-            case .keepAwake, .stats: true
+            case .keepAwake: true
             }
         }
     }
@@ -305,7 +259,6 @@ public final class IslandModel {
         case .timer: timer.isActive
         case .stopwatch: stopwatch.isActive
         case .keepAwake: keepAwake.isOn
-        case .stats: settings.statsEnabled
         default: false
         }
     }
@@ -335,11 +288,6 @@ public final class IslandModel {
         case .mirror: showTab(.mirror)
         case .keepAwake:
             keepAwake.toggle()
-            Haptics.perform(enabled: settings.hapticsEnabled)
-        case .stats:
-            // A switch, like Keep Awake: memory and CPU beside the camera, on or off.
-            settings.statsEnabled.toggle()
-            syncStatsSampling()
             Haptics.perform(enabled: settings.hapticsEnabled)
         }
     }
@@ -394,9 +342,7 @@ public final class IslandModel {
         }
 
         if settings.notchOpenMode == .hover, inside, case .compact(let primary, _) = current {
-            // Stats stands in for an empty notch, so hovering it opens Home like the bare notch
-            // does; clicking the numbers opens Stats.
-            scheduleHoverExpand(primary == .stats ? .home : .activity(primary))
+            scheduleHoverExpand(.activity(primary))
         } else if settings.notchOpenMode == .hover, inside, current == .idle || (current.isHidden && (!waitsForReveal || isHoveringNotch)) {
             // The tucked-away notch, or the resting pill (Show when idle, or while previewing a
             // size in Settings), opens Home.
@@ -455,9 +401,6 @@ public final class IslandModel {
             expand(.home)
         case .compact(let primary, _):
             expand(.activity(primary))
-        case .alert(.download(let url)):
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-            dismissAlert()
         case .alert(.updateAvailable):
             dismissAlert()
             onOpenAbout?()
@@ -477,8 +420,6 @@ public final class IslandModel {
     }
 
     public func expand(_ target: ExpandTarget) {
-        // Stats opens as a panel in the nook, with the grid and Home a click away.
-        let target = target == .activity(.stats) ? .nook(.stats) : target
         cancelReveal()
         hoverExpandTask?.cancel()
         collapseTask?.cancel()
@@ -498,7 +439,6 @@ public final class IslandModel {
         isTypingInNook = false
         if expandTarget == .notes { notes.save() }
         expandTarget = nil
-        syncStatsSampling()
         pumpAlerts()
     }
 
@@ -533,8 +473,7 @@ public final class IslandModel {
             switch (target, self.presentation) {
             case (.activity(let kind), .compact(let primary, _)) where self.isHoveringPill && primary == kind:
                 self.expand(target)
-            case (.home, .hidden) where self.isHoveringNotch, (.home, .idle) where self.isHoveringPill,
-                 (.home, .compact(.stats, _)) where self.isHoveringPill:
+            case (.home, .hidden) where self.isHoveringNotch, (.home, .idle) where self.isHoveringPill:
                 self.expand(.home)
                 self.pointerEnteredExpanded = true
             default:
@@ -565,14 +504,8 @@ public final class IslandModel {
 
     private func isEnabled(_ alert: IslandAlert) -> Bool {
         switch alert {
-        case .charging: settings.chargingAlertsEnabled
-        case .lowBattery: settings.lowBatteryAlertsEnabled
-        case .headphones: settings.headphoneAlertsEnabled
-        case .level: settings.levelsEnabled
         case .upcomingEvent: settings.calendarEnabled
-        case .download: settings.downloadsEnabled
-        case .updateAvailable: true
-        case .timerFinished, .welcome, .shortcut: true
+        case .updateAvailable, .timerFinished, .welcome: true
         }
     }
 
@@ -709,7 +642,7 @@ public final class IslandModel {
         }
     }
 
-    // MARK: AirDrop
+    // MARK: File drops
 
     public func fileDragChanged(isDragging: Bool, at point: CGPoint?) {
         if !isDragging {
@@ -742,7 +675,6 @@ public final class IslandModel {
         guard !supported.isEmpty else { return false }
         switch destination {
         case .tray: return settings.trayEnabled && addToTray(supported) > 0
-        case .airDrop: return settings.airDropEnabled && airDrop(supported.filter(\.isFileURL))
         }
     }
 
@@ -776,22 +708,6 @@ public final class IslandModel {
         expand(ExpandTarget(tab))
     }
 
-    /// Sends dropped files with AirDrop. Returns false if AirDrop can't take them.
-    @discardableResult
-    public func airDrop(_ urls: [URL]) -> Bool {
-        isFileDragNear = false
-        setTargeted(nil, false)
-        guard !urls.isEmpty, let service = NSSharingService(named: .sendViaAirDrop), service.canPerform(withItems: urls) else {
-            log.notice("AirDrop is not available for the dropped items")
-            NSSound.beep()
-            return false
-        }
-        Haptics.perform(enabled: settings.hapticsEnabled)
-        NSApp.activate()
-        service.perform(withItems: urls)
-        return true
-    }
-
     // MARK: Observation
 
     /// Clears choices that point at activities which have ended, so they don't come back
@@ -808,20 +724,7 @@ public final class IslandModel {
         }
     }
 
-    /// Stats reads the system only while it's showing; music or a timer pushes it aside, and
-    /// then there's nothing to update.
-    private func syncStatsSampling() {
-        if !settings.statsEnabled {
-            stats.stop()
-        } else if activeActivities.contains(.stats) || expandTarget == .nook(.stats) {
-            stats.start()
-        } else {
-            stats.pause()
-        }
-    }
-
     private func reconcile() {
-        syncStatsSampling()
         let active = activeActivities
         if case .activity(let kind) = expandTarget, !active.contains(kind) {
             expandTarget = nil
@@ -834,14 +737,11 @@ public final class IslandModel {
 
     private func observeSettings() {
         withObservationTracking {
-            _ = settings.airDropEnabled
             _ = settings.trayEnabled
             _ = settings.mirrorEnabled
             _ = settings.clipboardEnabled
             _ = settings.notesEnabled
-            _ = settings.downloadsEnabled
             _ = settings.remindersEnabled
-            _ = settings.statsEnabled
             _ = settings.keyboardShortcutsEnabled
             _ = settings.checksForUpdates
         } onChange: { [weak self] in
@@ -856,14 +756,7 @@ public final class IslandModel {
                 if case .clipboard = self.expandTarget, !self.settings.clipboardEnabled { self.collapse() }
                 if case .notes = self.expandTarget, !self.settings.notesEnabled { self.collapse() }
                 if self.settings.remindersEnabled { self.reminders.start() } else { self.reminders.stop() }
-                self.syncStatsSampling()
-                if !self.settings.statsEnabled, case .nook(.stats) = self.expandTarget { self.collapse() }
                 if self.settings.keyboardShortcutsEnabled { self.hotKeys.register() } else { self.hotKeys.unregister() }
-                if self.settings.downloadsEnabled {
-                    self.downloads.start()
-                } else {
-                    self.downloads.stop()
-                }
                 if self.settings.clipboardEnabled {
                     self.clipboard.start()
                 } else {
