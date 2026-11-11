@@ -1,6 +1,7 @@
 import SwiftUI
 
-// Cards beside the widget column on Home: the scratchpad, today's reminders and recent copies.
+// Cards beside the widget column on Home: the scratchpad, today's reminders, recent copies and
+// a camera mirror.
 // Each one works right where it is, and its title opens the full panel.
 
 /// The card for one Home feature.
@@ -13,6 +14,7 @@ struct HomeCardView: View {
         case .notes: NotesHomeCard(model: model)
         case .reminders: RemindersHomeCard(model: model)
         case .clipboard: ClipboardHomeCard(model: model)
+        case .mirror: MirrorHomeCard(model: model)
         }
     }
 }
@@ -124,6 +126,80 @@ private struct RemindersHomeCard: View {
             Button(button, action: action)
                 .buttonStyle(ChipButtonStyle(tint: NotchColor.blue, scale: s))
                 .fixedSize()
+        }
+    }
+}
+
+// MARK: Mirror
+
+/// A quick look at the camera. It only turns on when you click it, and goes off again when the
+/// notch closes, so opening Home never lights up the camera by itself.
+private struct MirrorHomeCard: View {
+    let model: IslandModel
+    @State private var isOn = false
+    @State private var isHovering = false
+    @Environment(\.notchScale) private var s
+
+    var body: some View {
+        let camera = model.camera
+        HomeCardFrame(title: "Mirror", symbol: "web.camera", tint: NotchColor.blue) {
+            model.open(.mirror)
+        } content: {
+            let shape = RoundedRectangle(cornerRadius: 10 * s, style: .continuous)
+            Button {
+                switch camera.state {
+                case .granted: withAnimation(.smooth(duration: 0.3)) { isOn.toggle() }
+                case .notAsked: camera.request()
+                case .denied: camera.openPrivacySettings()
+                case .noCamera: break
+                }
+            } label: {
+                ZStack {
+                    shape.fill(Color.white.opacity(isHovering ? 0.1 : 0.05))
+                    if isOn, camera.state == .granted {
+                        CameraPreview()
+                            .clipShape(shape)
+                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    } else {
+                        VStack(spacing: 4 * s) {
+                            Image(systemName: Self.symbol(camera.state))
+                                .font(.system(size: 16 * s, weight: .regular))
+                                .foregroundStyle(.white.opacity(0.85))
+                            Text(Self.prompt(camera.state))
+                                .font(.system(size: 10 * s, weight: .medium))
+                                .foregroundStyle(NotchColor.secondaryText)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.horizontal, 4 * s)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(shape)
+                .animation(.easeOut(duration: 0.15), value: isHovering)
+            }
+            .buttonStyle(PressableButtonStyle())
+            .disabled(camera.state == .noCamera)
+            .onHover { isHovering = $0 }
+            .onAppear { camera.refresh() }
+            .help(isOn ? "Turn off the camera" : "Check how you look")
+            .accessibilityLabel(Text(isOn ? "Turn off the camera" : "Camera Mirror"))
+        }
+    }
+
+    private static func symbol(_ state: CameraAccess.State) -> String {
+        switch state {
+        case .noCamera: "video.slash"
+        case .denied: "lock.fill"
+        default: "camera.fill"
+        }
+    }
+
+    private static func prompt(_ state: CameraAccess.State) -> LocalizedStringKey {
+        switch state {
+        case .granted: "Click to look"
+        case .notAsked: "Click to allow the camera"
+        case .denied: "Camera is off. Click to allow"
+        case .noCamera: "No camera"
         }
     }
 }

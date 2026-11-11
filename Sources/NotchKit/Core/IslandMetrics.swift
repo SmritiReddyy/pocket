@@ -88,6 +88,7 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
     case notes
     case reminders
     case clipboard
+    case mirror
 
     /// Width before Small / Medium / Large scaling.
     public var width: CGFloat {
@@ -95,6 +96,7 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
         case .notes: 160
         case .reminders: 180
         case .clipboard: 150
+        case .mirror: 120
         }
     }
 }

@@ -228,6 +228,7 @@ public final class IslandModel {
             case .notes: settings.notesEnabled
             case .reminders: settings.remindersEnabled
             case .clipboard: settings.clipboardEnabled
+            case .mirror: settings.mirrorEnabled
             }
         }
     }

@@ -367,9 +367,10 @@ struct HomeCardTests {
     @Test func cardsFollowTheirSettings() {
         let defaults = UserDefaults(suiteName: "HomeCardTests.\(UUID().uuidString)")!
         let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: nil))
-        #expect(model.homeContent.cards == [.notes, .reminders, .clipboard])
+        #expect(model.homeContent.cards == [.notes, .reminders, .clipboard, .mirror])
         model.settings.remindersEnabled = false
         model.settings.clipboardEnabled = false
+        model.settings.mirrorEnabled = false
         #expect(model.homeContent.cards == [.notes])
         model.settings.notesEnabled = false
         #expect(model.homeContent.cards.isEmpty)

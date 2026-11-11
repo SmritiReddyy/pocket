@@ -29,6 +29,8 @@ second and it slides down.
   Click the list name in the card's corner to show one of your lists instead.
 - **📋 Clipboard** — your last three copies. Click one to copy it again (passwords are skipped,
   nothing is saved to disk, and copies disappear after 48 hours).
+- **📷 Mirror** — click it to see your camera, click again to turn it off. It also turns off when the
+  notch closes, so opening Home never switches the camera on by itself.
 
 Click any card's title to open its full panel. Don't want a card? Switch it off in
 Settings › Home and Home shrinks to fit.
