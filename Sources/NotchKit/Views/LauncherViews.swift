@@ -214,7 +214,7 @@ struct ReminderListMenu: View {
             }
             .font(.system(size: (compact ? 10 : 11) * s, weight: .semibold))
             .foregroundStyle(reminders.selectedList.map { NotchColor.accent($0.color) } ?? NotchColor.secondaryText)
-            .frame(maxWidth: (compact ? 74 : 140) * s, alignment: .trailing)
+            .frame(maxWidth: (compact ? 58 : 140) * s, alignment: .trailing)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)

@@ -46,7 +46,7 @@ struct NookContainer<Content: View>: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.top, (IslandMetrics.Nook.bodyTopInset * s).rounded())
         }
-        .padding(.horizontal, 20 * s)
+        .padding(.horizontal, IslandMetrics.Nook.sidePadding * s)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
@@ -264,7 +264,7 @@ struct HomeBody: View {
                         .frame(height: IslandMetrics.Nook.row * s)
                 }
                 if content.hasTimer {
-                    TimerPresetsRow(model: model, presetCount: content.cards.isEmpty ? 3 : 2)
+                    TimerPresetsRow(model: model, isCompact: !content.cards.isEmpty)
                         .frame(height: IslandMetrics.Nook.row * s)
                 }
                 if content.rowCount == 0 && content.cards.isEmpty {
@@ -415,12 +415,12 @@ private struct QuickActionLabel: View {
 /// "Timer ›" opens the full timer; the capsules on the right start one straight away.
 private struct TimerPresetsRow: View {
     let model: IslandModel
-    /// Fewer when cards sit beside the column.
-    var presetCount = 3
+    /// With cards beside the column: two presets, and Focus as a round icon.
+    var isCompact = false
     @Environment(\.notchScale) private var s
 
     var body: some View {
-        HStack(spacing: 6 * s) {
+        HStack(spacing: (isCompact ? 4 : 6) * s) {
             Button {
                 model.timerPanelMode = .timer
                 model.showTab(.timers)
@@ -431,19 +431,23 @@ private struct TimerPresetsRow: View {
             .buttonStyle(PressableButtonStyle())
             .help("Any length, Pomodoro or Stopwatch")
             .accessibilityLabel(Text("Timer"))
-            Spacer(minLength: 8 * s)
-            ForEach(TimerService.presets.prefix(presetCount), id: \.self) { preset in
+            Spacer(minLength: (isCompact ? 2 : 8) * s)
+            ForEach(TimerService.presets.prefix(isCompact ? 2 : 3), id: \.self) { preset in
                 Button(Self.shortLabel(preset)) { model.startTimer(preset) }
-                    .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s, width: 40 * s))
+                    .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s, width: (isCompact ? 36 : 40) * s))
                     .accessibilityLabel(Text("Start \(TimeFormatting.spoken(preset)) timer"))
             }
             Button {
                 model.startSession(.focus)
             } label: {
-                Label("Focus", systemImage: TimerMode.focus.symbol)
-                    .labelStyle(.titleAndIcon)
+                if isCompact {
+                    Image(systemName: TimerMode.focus.symbol)
+                } else {
+                    Label("Focus", systemImage: TimerMode.focus.symbol)
+                        .labelStyle(.titleAndIcon)
+                }
             }
-            .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s))
+            .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s, width: isCompact ? 30 * s : nil))
             .help("Focus for \(model.settings.focusMinutes) minutes, then take a \(model.settings.breakMinutes) minute break")
             .accessibilityLabel(Text("Start a \(model.settings.focusMinutes) minute focus session"))
         }

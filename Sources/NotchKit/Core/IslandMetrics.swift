@@ -39,11 +39,11 @@ public enum IslandMetrics {
         public static let row: CGFloat = 30
         public static let rowGap: CGFloat = 8
         /// Home: the calendar and timer column when cards sit beside it. Just wide
-        /// enough for the timer row with two presets and the Focus button.
-        public static let homeColumnWidth: CGFloat = 250
-        public static let homeCardGap: CGFloat = 12
+        /// enough for the timer row with two presets and a round Focus button.
+        public static let homeColumnWidth: CGFloat = 205
+        public static let homeCardGap: CGFloat = 10
         /// Left and right padding inside the nook.
-        public static let sidePadding: CGFloat = 20
+        public static let sidePadding: CGFloat = 16
         /// The grid of features gets more height than the other views, so its tiles can breathe.
         public static let launcherBody: CGFloat = 170
         public static let launcherTile: CGFloat = 76
@@ -93,10 +93,10 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
     /// Width before Small / Medium / Large scaling.
     public var width: CGFloat {
         switch self {
-        case .notes: 160
-        case .reminders: 180
-        case .clipboard: 150
-        case .mirror: 120
+        case .notes: 150
+        case .reminders: 160
+        case .clipboard: 120
+        case .mirror: 90
         }
     }
 }
