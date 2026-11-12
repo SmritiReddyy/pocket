@@ -347,8 +347,11 @@ struct HomeCardTests {
         let cards = HomeCard.allCases.reduce(0) { $0 + $1.width + IslandMetrics.Nook.homeCardGap }
         #expect(full.content.width == 2 * IslandMetrics.Nook.sidePadding + IslandMetrics.Nook.homeColumnWidth + cards)
         #expect(full.pill.maxX <= engine.windowSize.width && full.pill.minX >= 0)
-        // Only Home grows; the other tabs keep the standard nook.
-        #expect(engine.layout(for: .tray, home: .full, hovering: false).pill == plain.pill)
+        // Every page shares Home's width, so switching between them never resizes the shape.
+        for tab in HomeTab.allCases {
+            let page = engine.layout(for: .nook(tab), home: .full, hovering: false)
+            #expect(page.pill.width == full.pill.width, "\(tab)")
+        }
     }
 
     @Test func everySizeFitsTheScreen() {

@@ -221,11 +221,11 @@ public struct LayoutEngine: Equatable, Sendable {
         return tab.isTab
     }
 
-    /// The nook's width for a view: elongated, standard, or Home widened for its cards.
+    /// In the standard layout every page shares Home's width, so moving between Home, Tray, the
+    /// grid and the panels never resizes the shape.
     public func nookWidth(for presentation: IslandPresentation, home: HomeContent = HomeContent()) -> CGFloat {
         if isElongated(presentation) { return elongatedWidth }
-        if presentation == .home { return homeWidth(home) }
-        return nookWidth
+        return homeWidth(home)
     }
 
     /// Home in the standard layout, wide enough for the cards beside its column.
