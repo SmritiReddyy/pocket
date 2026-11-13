@@ -18,7 +18,7 @@ and tucks away when nothing is. Think iPhone Dynamic Island, but for my Mac.
 - 📝 a **scratchpad** you can type into right there
 - ✅ today's **reminders**, ready to tick off
 - 📋 your last few **copies**, one click to copy again
-- 📅 your next **event** and ⏱️ one-tap **timers** and Focus sessions
+- 📅 your next **event** and a 📷 camera **mirror**
 
 **Click it again** and it zips shut.
 

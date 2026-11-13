@@ -207,24 +207,16 @@ public final class IslandModel {
         settings.trayEnabled
     }
 
-    /// The calendar row shows the next event, or a button to connect the calendar.
-    public var showsCalendarRow: Bool {
-        // Always shown when switched on, so there's a way to connect or fix access from Home.
-        settings.calendarEnabled
-    }
-
     public var homeContent: HomeContent {
-        HomeContent(
-            hasEvent: showsCalendarRow,
-            hasTimer: settings.timerEnabled,
-            cards: homeCards
-        )
+        HomeContent(cards: homeCards)
     }
 
-    /// Cards beside the column on Home: whichever of these features are switched on.
+    /// Cards on Home: whichever of these features are switched on. The calendar card shows up
+    /// whenever Calendar is on, so there's always a way to connect or fix access from Home.
     public var homeCards: [HomeCard] {
         HomeCard.allCases.filter { card in
             switch card {
+            case .calendar: settings.calendarEnabled
             case .notes: settings.notesEnabled
             case .reminders: settings.remindersEnabled
             case .clipboard: settings.clipboardEnabled

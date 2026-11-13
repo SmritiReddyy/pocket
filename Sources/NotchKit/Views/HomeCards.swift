@@ -1,7 +1,7 @@
 import SwiftUI
 
-// Cards beside the widget column on Home: the scratchpad, today's reminders, recent copies and
-// a camera mirror.
+// Home's cards: the next event, the scratchpad, today's reminders, recent copies and a camera
+// mirror.
 // Each one works right where it is, and its title opens the full panel.
 
 /// The card for one Home feature.
@@ -11,6 +11,7 @@ struct HomeCardView: View {
 
     var body: some View {
         switch card {
+        case .calendar: CalendarHomeCard(model: model)
         case .notes: NotesHomeCard(model: model)
         case .reminders: RemindersHomeCard(model: model)
         case .clipboard: ClipboardHomeCard(model: model)
@@ -58,6 +59,68 @@ private struct HomeCardFrame<Content: View>: View {
         .padding(.vertical, 8 * s)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(RoundedRectangle(cornerRadius: 14 * s, style: .continuous).fill(Color.white.opacity(0.07)))
+    }
+}
+
+// MARK: Calendar
+
+/// The next event over two lines, and when it starts. Click it for the month.
+private struct CalendarHomeCard: View {
+    let model: IslandModel
+    @Environment(\.notchScale) private var s
+
+    var body: some View {
+        let calendar = model.calendar
+        HomeCardFrame(title: "Calendar", symbol: "calendar", tint: NotchColor.red) {
+            model.open(.calendar)
+        } content: {
+            switch calendar.access {
+            case .notAsked:
+                prompt("See your next event here.", button: "Connect") { calendar.requestAccess() }
+            case .denied, .limited:
+                prompt("Calendar access is off.", button: "Allow") { calendar.openPrivacySettings() }
+            case .granted:
+                Button { model.open(.calendar) } label: {
+                    if let event = calendar.nextEvent {
+                        VStack(alignment: .leading, spacing: 4 * s) {
+                            Text(event.title)
+                                .font(.system(size: 12 * s, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                            TimelineView(.everyMinute) { context in
+                                Text(CalendarRules.relativeLabel(for: event, at: context.date))
+                                    .font(.system(size: 11 * s, weight: .medium))
+                                    .monospacedDigit()
+                                    .foregroundStyle(event.isHappening(at: context.date) ? NotchColor.green : NotchColor.secondaryText)
+                                    .lineLimit(1)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .contentShape(Rectangle())
+                    } else {
+                        Text("No more events this week")
+                            .font(.system(size: 11 * s, weight: .medium))
+                            .foregroundStyle(NotchColor.secondaryText)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .contentShape(Rectangle())
+                    }
+                }
+                .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel(Text(calendar.nextEvent.map { "Next event, \($0.title)" } ?? "Calendar"))
+            }
+        }
+    }
+
+    private func prompt(_ text: LocalizedStringKey, button: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 6 * s) {
+            Text(text)
+                .font(.system(size: 11 * s, weight: .medium))
+                .foregroundStyle(NotchColor.secondaryText)
+            Button(button, action: action)
+                .buttonStyle(ChipButtonStyle(tint: NotchColor.red, scale: s))
+                .fixedSize()
+        }
     }
 }
 

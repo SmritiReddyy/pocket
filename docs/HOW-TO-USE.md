@@ -20,9 +20,8 @@ second and it slides down.
 
 ## Home
 
-- **📅 Calendar** — your next event. Click it for the month view. Hit **Connect** the first time.
-- **⏱️ Timer** — tap **5m** or **10m** to start, **Focus** for a Pomodoro, or **Timer ›** for any
-  length or a stopwatch.
+- **📅 Calendar** — your next event and when it starts. Click it for the month view. Hit
+  **Connect** the first time.
 - **📝 Scratchpad** — just start typing. Colour, size, bold, italic and underline sit at the
   bottom. It saves as you go.
 - **✅ Reminders** — today's to-dos. Tick the circle to finish one. Hit **Connect** the first time.
@@ -31,6 +30,8 @@ second and it slides down.
   nothing is saved to disk, and copies disappear after 48 hours).
 - **📷 Mirror** — click it to see your camera, click again to turn it off. It also turns off when the
   notch closes, so opening Home never switches the camera on by itself.
+
+Timers, Focus sessions and the stopwatch live in the grid (⊞ top right), or press ⌃⌥R.
 
 Click any card's title to open its full panel. Don't want a card? Switch it off in
 Settings › Home and Home shrinks to fit.

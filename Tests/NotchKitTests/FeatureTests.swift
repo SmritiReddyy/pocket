@@ -229,8 +229,7 @@ struct NewFeatureLayoutTests {
 
     @Test func nookIsWideShortAndTheSameForEveryTab() throws {
         let notch = try #require(ScreenMetrics.sample.notch)
-        let full = HomeContent(hasEvent: true, hasTimer: true)
-        #expect(full.fitsInNook, "three widget rows fit in the column")
+        let full = HomeContent.full
         let sizes = [IslandPresentation.home, .tray, .mirror].map { engine.layout(for: $0, home: full, hovering: false).pill.size }
         #expect(Set(sizes.map { "\($0)" }).count == 1, "switching tabs never resizes the shape")
         let home = engine.layout(for: .home, home: full, hovering: false)
@@ -239,8 +238,8 @@ struct NewFeatureLayoutTests {
         #expect(home.stripHeight == notch.height, "tabs sit beside the camera")
         #expect(home.cameraGap == notch.width)
         #expect(home.content.minY == 0)
-        let empty = engine.layout(for: .home, home: HomeContent(hasTimer: false), hovering: false)
-        #expect(empty.pill == home.pill)
+        let empty = engine.layout(for: .home, home: HomeContent(), hovering: false)
+        #expect(empty.pill.width == engine.nookWidth + 2 * IslandMetrics.expandedFlare, "no cards: the standard nook")
     }
 
     @Test func nookBodySitsEvenlyBetweenTheStripAndTheBottom() throws {
@@ -253,7 +252,7 @@ struct NewFeatureLayoutTests {
     }
 
     @Test func everyTabFitsTheWindow() {
-        let full = HomeContent(hasEvent: true, hasTimer: true)
+        let full = HomeContent.full
         let external = ScreenMetrics(size: CGSize(width: 1920, height: 1080), notch: nil, menuBarHeight: 25)
         for screen in [ScreenMetrics.sample, external] {
             let engine = LayoutEngine(screen: screen, appearance: .standard)
@@ -327,12 +326,13 @@ struct NewFeatureModelTests {
         #expect(model.homeTabs == [.home, .tray])
     }
 
-    @Test func homeRowsFollowSettings() {
+    @Test func theCalendarCardFollowsItsSetting() {
         let model = makeModel()
+        #expect(model.homeContent.cards.first == .calendar)
         model.settings.calendarEnabled = false
-        #expect(!model.homeContent.hasEvent)
+        #expect(!model.homeContent.cards.contains(.calendar))
         model.settings.timerEnabled = false
-        #expect(!model.homeContent.hasTimer)
+        #expect(model.homeContent.cards.first == .notes, "Timer isn't on Home any more")
     }
 
 }
@@ -344,8 +344,8 @@ struct HomeCardTests {
         let plain = engine.layout(for: .home, home: HomeContent(), hovering: false)
         let full = engine.layout(for: .home, home: .full, hovering: false)
         #expect(plain.pill.width == engine.nookWidth + 2 * IslandMetrics.expandedFlare)
-        let cards = HomeCard.allCases.reduce(0) { $0 + $1.width + IslandMetrics.Nook.homeCardGap }
-        #expect(full.content.width == 2 * IslandMetrics.Nook.sidePadding + IslandMetrics.Nook.homeColumnWidth + cards)
+        let cards = HomeCard.allCases.reduce(0) { $0 + $1.width } + CGFloat(HomeCard.allCases.count - 1) * IslandMetrics.Nook.homeCardGap
+        #expect(full.content.width == 2 * IslandMetrics.Nook.sidePadding + cards)
         #expect(full.pill.maxX <= engine.windowSize.width && full.pill.minX >= 0)
         // Every page shares Home's width, so switching between them never resizes the shape.
         for tab in HomeTab.allCases {
@@ -370,10 +370,11 @@ struct HomeCardTests {
     @Test func cardsFollowTheirSettings() {
         let defaults = UserDefaults(suiteName: "HomeCardTests.\(UUID().uuidString)")!
         let model = IslandModel(settings: SettingsStore(defaults: defaults), tray: TrayStore(folder: nil))
-        #expect(model.homeContent.cards == [.notes, .reminders, .clipboard, .mirror])
+        #expect(model.homeContent.cards == [.calendar, .notes, .reminders, .clipboard, .mirror])
         model.settings.remindersEnabled = false
         model.settings.clipboardEnabled = false
         model.settings.mirrorEnabled = false
+        model.settings.calendarEnabled = false
         #expect(model.homeContent.cards == [.notes])
         model.settings.notesEnabled = false
         #expect(model.homeContent.cards.isEmpty)

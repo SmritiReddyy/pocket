@@ -36,11 +36,6 @@ public enum IslandMetrics {
         /// Extra room between the strip and the body, so the body sits as far below
         /// the strip as it does above the bottom edge.
         public static let bodyTopInset: CGFloat = 10
-        public static let row: CGFloat = 30
-        public static let rowGap: CGFloat = 8
-        /// Home: the calendar and timer column when cards sit beside it. Just wide
-        /// enough for the timer row with two presets and a round Focus button.
-        public static let homeColumnWidth: CGFloat = 205
         public static let homeCardGap: CGFloat = 10
         /// Left and right padding inside the nook.
         public static let sidePadding: CGFloat = 16
@@ -83,8 +78,9 @@ public enum IslandMetrics {
     public static let virtualNotchMinHeight: CGFloat = 32
 }
 
-/// A card beside the widget column on Home.
+/// A card on Home, in order.
 public enum HomeCard: String, CaseIterable, Sendable, Hashable {
+    case calendar
     case notes
     case reminders
     case clipboard
@@ -93,6 +89,7 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
     /// Width before Small / Medium / Large scaling.
     public var width: CGFloat {
         switch self {
+        case .calendar: 140
         case .notes: 150
         case .reminders: 160
         case .clipboard: 120
@@ -101,39 +98,23 @@ public enum HomeCard: String, CaseIterable, Sendable, Hashable {
     }
 }
 
-/// Which widgets the Home tab shows.
+/// Which cards the Home tab shows.
 public struct HomeContent: Equatable, Sendable {
-    public var hasEvent: Bool
-    public var hasTimer: Bool
-    /// Cards beside the column, in order.
     public var cards: [HomeCard]
 
-    public init(hasEvent: Bool = false, hasTimer: Bool = true, cards: [HomeCard] = []) {
-        self.hasEvent = hasEvent
-        self.hasTimer = hasTimer
+    public init(cards: [HomeCard] = []) {
         self.cards = cards
     }
 
-    /// Every widget and card switched on.
-    public static let full = HomeContent(hasEvent: true, hasTimer: true, cards: HomeCard.allCases)
+    /// Every card switched on.
+    public static let full = HomeContent(cards: HomeCard.allCases)
 
-    /// Home's width before scaling: the standard nook, widened to fit the cards beside the column.
+    /// Home's width before scaling: the cards side by side, and never narrower than the standard
+    /// nook, which the grid and the panels need.
     public var width: CGFloat {
         typealias Nook = IslandMetrics.Nook
         guard !cards.isEmpty else { return Nook.width }
-        let cardsWidth = cards.reduce(0) { $0 + $1.width + Nook.homeCardGap }
-        return max(Nook.width, 2 * Nook.sidePadding + Nook.homeColumnWidth + cardsWidth)
-    }
-
-    /// Rows in the widget column (calendar, timer).
-    public var rowCount: Int {
-        [hasEvent, hasTimer].filter { $0 }.count
-    }
-
-    /// Every row fits in the nook without scrolling.
-    public var fitsInNook: Bool {
-        typealias Nook = IslandMetrics.Nook
-        let rows = CGFloat(rowCount)
-        return rows * Nook.row + max(0, rows - 1) * Nook.rowGap <= Nook.body
+        let cardsWidth = cards.reduce(0) { $0 + $1.width } + CGFloat(cards.count - 1) * Nook.homeCardGap
+        return max(Nook.width, 2 * Nook.sidePadding + cardsWidth)
     }
 }

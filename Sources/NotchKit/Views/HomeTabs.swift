@@ -242,7 +242,7 @@ private struct SettingsButton: View {
 
 // MARK: Home
 
-/// Calendar and timers, with the scratchpad, reminders and clipboard cards beside them.
+/// Home's cards side by side: calendar, scratchpad, reminders, clipboard and mirror.
 struct HomeBody: View {
     let model: IslandModel
     @Environment(\.notchScale) private var s
@@ -258,120 +258,21 @@ struct HomeBody: View {
     private var standard: some View {
         let content = model.homeContent
         return HStack(alignment: .top, spacing: IslandMetrics.Nook.homeCardGap * s) {
-            VStack(alignment: .leading, spacing: IslandMetrics.Nook.rowGap * s) {
-                if content.hasEvent {
-                    CalendarRow(model: model, calendar: model.calendar)
-                        .frame(height: IslandMetrics.Nook.row * s)
-                }
-                if content.hasTimer {
-                    TimerPresetsRow(model: model, isCompact: !content.cards.isEmpty)
-                        .frame(height: IslandMetrics.Nook.row * s)
-                }
-                if content.rowCount == 0 && content.cards.isEmpty {
-                    Text("Nothing live right now")
-                        .font(.system(size: 13 * s, weight: .medium))
-                        .foregroundStyle(NotchColor.secondaryText)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+            if content.cards.isEmpty {
+                Text("Nothing on Home. Turn cards on in Settings › Home.")
+                    .font(.system(size: 13 * s, weight: .medium))
+                    .foregroundStyle(NotchColor.secondaryText)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            // The nook is widened by exactly the cards' widths, so the column keeps what's left.
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             ForEach(content.cards, id: \.self) { card in
                 HomeCardView(model: model, card: card)
                     .frame(width: card.width * s)
                     .frame(maxHeight: .infinity)
             }
         }
+        // Home is never narrower than the grid needs; with few cards they sit in the middle.
+        .frame(maxWidth: .infinity)
         .padding(.bottom, 2 * s)
-    }
-}
-
-/// The next event, or a button to connect the calendar the first time.
-private struct CalendarRow: View {
-    let model: IslandModel
-    let calendar: CalendarService
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        HStack(spacing: 8 * s) {
-            switch calendar.access {
-            case .notAsked:
-                RowLabel(symbol: "calendar", tint: NotchColor.red, title: "Calendar")
-                Spacer(minLength: 8 * s)
-                Button("Connect") { calendar.requestAccess() }
-                    .buttonStyle(QuickActionStyle(tint: NotchColor.red, scale: s))
-            case .denied, .limited:
-                RowLabel(symbol: "calendar", tint: NotchColor.red, title: "Calendar")
-                Spacer(minLength: 8 * s)
-                Button("Allow Access") { calendar.openPrivacySettings() }
-                    .buttonStyle(QuickActionStyle(tint: NotchColor.red, scale: s))
-                    .help("Turn on Pocket in Privacy & Security › Calendars")
-            case .granted:
-                // Always shown once connected, even on a free day, and always opens the month.
-                Button { model.showTab(.calendar) } label: {
-                    HStack(spacing: 8 * s) {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 12 * s, weight: .semibold))
-                            .foregroundStyle(NotchColor.red)
-                            .frame(width: 16 * s)
-                        if let event = calendar.nextEvent {
-                            Text(event.title)
-                                .font(.system(size: 12 * s, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                            Spacer(minLength: 6 * s)
-                            TimelineView(.everyMinute) { context in
-                                Text(CalendarRules.relativeLabel(for: event, at: context.date))
-                                    .font(.system(size: 11 * s, weight: .medium))
-                                    .monospacedDigit()
-                                    .foregroundStyle(event.isHappening(at: context.date) ? NotchColor.green : NotchColor.secondaryText)
-                                    .fixedSize()
-                            }
-                        } else {
-                            Text("No more events this week")
-                                .font(.system(size: 12 * s, weight: .medium))
-                                .foregroundStyle(NotchColor.secondaryText)
-                                .lineLimit(1)
-                            Spacer(minLength: 6 * s)
-                        }
-                        Image(systemName: "chevron.forward")
-                            .font(.system(size: 9 * s, weight: .bold))
-                            .foregroundStyle(Color.white.opacity(0.3))
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PressableButtonStyle())
-                .accessibilityLabel(Text(calendar.nextEvent.map { "Next event, \($0.title)" } ?? "Calendar"))
-            }
-        }
-    }
-}
-
-/// The start of a Home row: a tinted symbol and a name, like a row in an Apple list.
-private struct RowLabel: View {
-    let symbol: String
-    let tint: Color
-    let title: LocalizedStringKey
-    var showsChevron = false
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        HStack(spacing: 8 * s) {
-            Image(systemName: symbol)
-                .font(.system(size: 12 * s, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: 16 * s)
-            Text(title)
-                .font(.system(size: 12 * s, weight: .semibold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .fixedSize()
-            if showsChevron {
-                Image(systemName: "chevron.forward")
-                    .font(.system(size: 9 * s, weight: .bold))
-                    .foregroundStyle(Color.white.opacity(0.3))
-            }
-        }
     }
 }
 
@@ -413,52 +314,6 @@ private struct QuickActionLabel: View {
 }
 
 /// "Timer ›" opens the full timer; the capsules on the right start one straight away.
-private struct TimerPresetsRow: View {
-    let model: IslandModel
-    /// With cards beside the column: two presets, and Focus as a round icon.
-    var isCompact = false
-    @Environment(\.notchScale) private var s
-
-    var body: some View {
-        HStack(spacing: (isCompact ? 4 : 6) * s) {
-            Button {
-                model.timerPanelMode = .timer
-                model.showTab(.timers)
-            } label: {
-                RowLabel(symbol: "timer", tint: NotchColor.orange, title: "Timer", showsChevron: true)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(PressableButtonStyle())
-            .help("Any length, Pomodoro or Stopwatch")
-            .accessibilityLabel(Text("Timer"))
-            Spacer(minLength: (isCompact ? 2 : 8) * s)
-            ForEach(TimerService.presets.prefix(isCompact ? 2 : 3), id: \.self) { preset in
-                Button(Self.shortLabel(preset)) { model.startTimer(preset) }
-                    .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s, width: (isCompact ? 36 : 40) * s))
-                    .accessibilityLabel(Text("Start \(TimeFormatting.spoken(preset)) timer"))
-            }
-            Button {
-                model.startSession(.focus)
-            } label: {
-                if isCompact {
-                    Image(systemName: TimerMode.focus.symbol)
-                } else {
-                    Label("Focus", systemImage: TimerMode.focus.symbol)
-                        .labelStyle(.titleAndIcon)
-                }
-            }
-            .buttonStyle(QuickActionStyle(tint: NotchColor.orange, scale: s, width: isCompact ? 30 * s : nil))
-            .help("Focus for \(model.settings.focusMinutes) minutes, then take a \(model.settings.breakMinutes) minute break")
-            .accessibilityLabel(Text("Start a \(model.settings.focusMinutes) minute focus session"))
-        }
-    }
-
-    /// "5m", "10m": short enough that the row fits beside the music card.
-    private static func shortLabel(_ seconds: TimeInterval) -> String {
-        "\(Int(seconds / 60))m"
-    }
-}
-
 // MARK: Tray
 
 /// Files dropped on the notch. Drag them out, double-click to open, right-click for more.
